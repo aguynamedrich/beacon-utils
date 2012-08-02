@@ -25,6 +25,7 @@ public class RemoteImageView extends LinearLayout {
 	
 	boolean isAsync = false;
 	boolean hasImage = false;
+	boolean cacheToFile = true;
 	
 	private final Handler handler = new Handler();
 
@@ -60,6 +61,15 @@ public class RemoteImageView extends LinearLayout {
 		}
 			
 		imageInfo = info;
+	}
+	
+	/**
+	 * Allow the user to bypass caching the image to disk.
+	 * This defaults to true (caching to disk is turned on)
+	 * @param shouldCacheImagesToFile
+	 */
+	public void setCacheToFile(boolean cacheToFile) {
+		this.cacheToFile = cacheToFile;
 	}
 	
 	/**
@@ -109,7 +119,7 @@ public class RemoteImageView extends LinearLayout {
 	{
 		ImageFileHelper imageFileHelper = ServiceLocator.resolve(ImageFileHelper.class);
 		if(ImageInfoValidator.isValid(imageInfo))
-		{			
+		{
 			// attempt to load from local first
 			Bitmap bmp = imageFileHelper.loadImage(imageInfo);
 			if(bmp != null)
@@ -153,7 +163,8 @@ public class RemoteImageView extends LinearLayout {
 				if(bmp != null)
 				{
 					// Save locally to SD
-					imageFileHelper.saveImage(bmp, imageInfo);
+					if(cacheToFile)
+						imageFileHelper.saveImage(bmp, imageInfo);
 					hasImage = true;
 					
 					// Load bitmap for display on UI thread

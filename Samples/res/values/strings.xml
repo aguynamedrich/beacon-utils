@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">BeaconUtils Samples</string>
+    
+    <string name="app_directory">beaconutils-samples</string>
+    <string name="images_directory">.images</string>
+    
 </resources>

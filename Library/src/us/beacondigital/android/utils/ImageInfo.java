@@ -25,27 +25,55 @@ public class ImageInfo {
 	 */
 	public static class ImageDescriptor {
 		
+		private static final long DefaultNumericId = 0;
+		
 		private long numericId = Long.MIN_VALUE;
 		private String textId = null;
 		private UniqueIdType idType = UniqueIdType.LongInt;
 		private String imageDescription;
 		
-		public static ImageDescriptor create(long id, String imageDescription) {
+		public static ImageDescriptor create(String imageDescription, long id) {
 			ImageDescriptor descriptor = new ImageDescriptor();
 			descriptor.idType = UniqueIdType.LongInt;
 			descriptor.numericId = id;
-			descriptor.imageDescription = imageDescription;
+			descriptor.imageDescription = fixDescription(imageDescription);
 			return descriptor;
 		}
-		
-		public static ImageDescriptor create(String id, String imageDescription) {
+
+		public static ImageDescriptor create(String imageDescription, String id) {
 			ImageDescriptor descriptor = new ImageDescriptor();
 			descriptor.idType = UniqueIdType.String;
 			descriptor.textId = id;
-			descriptor.imageDescription = imageDescription;
+			descriptor.imageDescription = fixDescription(imageDescription);
 			return descriptor;
 		}
 		
+		/**
+		 * In cases where the ImageDescriptor does not refer to an item that requires an id,
+		 * set a default id so we pass validation.  This would be useful in a case that the 
+		 * item the image describes will only have one single representation
+		 * @param imageDescription
+		 * @return
+		 */
+		public static ImageDescriptor create(String imageDescription) {
+			ImageDescriptor descriptor = new ImageDescriptor();
+			descriptor.idType = UniqueIdType.LongInt;
+			descriptor.numericId = DefaultNumericId;
+			descriptor.imageDescription = fixDescription(imageDescription);
+			return descriptor;
+		}
+		
+		/**
+		 * Replace whitespace in image description with underscore for safer filename creation
+		 * @param imageDescription
+		 * @return
+		 */
+		private static String fixDescription(String imageDescription) {
+			if(!StringUtils.isNullOrEmpty(imageDescription))
+				imageDescription.replaceAll("\\s+", "_");
+			return imageDescription;
+		}
+
 		public boolean isValid() {
 			boolean isValid = true;
 			isValid &= !StringUtils.isNullOrEmpty(imageDescription);
@@ -67,7 +95,7 @@ public class ImageInfo {
 		}
 	}
 	
-	private ImageDescriptor descriptor;
+	private ImageDescriptor descriptor = null;
 	private String url;
 	private Extension ext = Extension.None;
 	private Extension defaultExt = Extension.None;
