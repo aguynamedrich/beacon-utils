@@ -11,7 +11,8 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 /**
- * 
+ * Class used by the RemoteImageView and external image downloading mechanisms to save remote images to 
+ * disk and to load images from disk.
  * @author Rich
  *
  */

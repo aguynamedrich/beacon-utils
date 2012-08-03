@@ -2,6 +2,11 @@ package us.beacondigital.android.utils;
 
 import org.apache.http.HttpResponse;
 
+/**
+ * Shortcuts for determining if an HttpResponse is valid and to determine the range of its status code
+ * @author Rich
+ *
+ */
 public class HttpUtils {
 
 	public static boolean isOK(HttpResponse response) {

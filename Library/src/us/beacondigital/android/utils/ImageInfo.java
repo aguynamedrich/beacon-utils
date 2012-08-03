@@ -2,6 +2,14 @@ package us.beacondigital.android.utils;
 
 import android.graphics.Bitmap.CompressFormat;
 
+/**
+ * This is a class that represents meta data about a remote image.  The consumer of this class
+ * (typically an Android activity) builds an instance of this object and its inner class
+ * ImageDescriptor and passes it to a RemoteImageView.  The meta data is used to manage the 
+ * downloading of remote image data and optionally caching the image for subsequent use.
+ * @author Rich Stern
+ *
+ */
 public class ImageInfo {
 	
 	private static final int DefaultQuality = 75;
