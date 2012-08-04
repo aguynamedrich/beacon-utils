@@ -1,4 +1,4 @@
-package us.beacondigital.android.utils;
+package us.beacondigital.utils;
 
 import android.graphics.Bitmap.CompressFormat;
 

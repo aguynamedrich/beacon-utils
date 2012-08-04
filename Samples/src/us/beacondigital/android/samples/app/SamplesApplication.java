@@ -1,8 +1,8 @@
 package us.beacondigital.android.samples.app;
 
 import us.beacondigital.android.samples.R;
-import us.beacondigital.android.utils.ImageFileHelper;
-import us.beacondigital.android.utils.ServiceLocator;
+import us.beacondigital.utils.ImageFileHelper;
+import us.beacondigital.utils.ServiceLocator;
 import android.app.Application;
 
 public class SamplesApplication extends Application {

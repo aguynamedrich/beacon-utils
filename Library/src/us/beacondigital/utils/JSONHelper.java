@@ -1,4 +1,4 @@
-package us.beacondigital.android.utils;
+package us.beacondigital.utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;

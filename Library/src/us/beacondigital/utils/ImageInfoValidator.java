@@ -1,4 +1,4 @@
-package us.beacondigital.android.utils;
+package us.beacondigital.utils;
 
 public class ImageInfoValidator {
 

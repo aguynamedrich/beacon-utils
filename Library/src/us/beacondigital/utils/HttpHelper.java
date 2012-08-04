@@ -1,4 +1,4 @@
-package us.beacondigital.android.utils;
+package us.beacondigital.utils;
 
 import java.io.InputStream;
 import java.net.URI;
