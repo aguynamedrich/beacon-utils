@@ -1,11 +1,14 @@
 package us.beacondigital.android.samples.activities;
 
 import us.beacondigital.android.samples.R;
+import us.beacondigital.android.samples.app.SamplesApplication;
 import us.beacondigital.utils.ImageInfo;
 import us.beacondigital.utils.ImageInfo.ImageDescriptor;
 import us.beacondigital.utils.RemoteImageView;
+import us.beacondigital.utils.ServiceLocator;
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -26,11 +29,19 @@ public class MainActivity extends Activity {
 		initRemoteImages();
 	}
 
+	/**
+	 * Initialize local Views
+	 */
 	private void initControls() {
 		imgGithub = (RemoteImageView) findViewById(R.id.imgGithub);
 		imgOctocat = (RemoteImageView) findViewById(R.id.imgOctocat);
 	}
 	
+	/**
+	 * Sample usage of the ImageInfo and ImageDescriptor classes to 
+	 * load remote images from the web into a RemoteImageView with 
+	 * caching both enabled and disabled
+	 */
 	private void initRemoteImages() {
 		ImageInfo imgGithubInfo = new ImageInfo(ImageDescriptor.create(GithubLogo), GithubLogoUrl);
 		imgGithub.setImageInfo(imgGithubInfo);

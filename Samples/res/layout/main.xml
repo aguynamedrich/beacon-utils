@@ -23,13 +23,13 @@
         android:orientation="vertical"
         android:background="#DDD">
         
-        <us.beacondigital.android.utils.RemoteImageView
+        <us.beacondigital.utils.RemoteImageView
             android:id="@+id/imgGithub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/heading_margin" />
         
-        <us.beacondigital.android.utils.RemoteImageView
+        <us.beacondigital.utils.RemoteImageView
             android:id="@+id/imgOctocat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

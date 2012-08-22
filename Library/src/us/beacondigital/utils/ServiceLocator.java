@@ -7,9 +7,9 @@ import android.content.Context;
 
 /**
  * 
- * @author Rich Stern
  * Utility class for lazy loading and maintaining single instance objects for 
  * easy reuse and object decoupling
+ * @author Rich Stern
  *
  */
 public class ServiceLocator {
@@ -81,6 +81,17 @@ public class ServiceLocator {
 	 * @return
 	 */
 	public static Application getAppContext() { return appContext; }
+	
+	/**
+	 * This is the generic version that is recommended so that casting doesn't need to be done
+	 * repeatedly within the app.  There is no error checking around the cast as there should be no 
+	 * reason to call this with the improper type.  This is the responsibility of the consumer.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getApp(Class<T> type) {
+		return (T) getAppContext();
+	}
 
 	/**
 	 * Manually register an already instantiated instance.

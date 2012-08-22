@@ -32,4 +32,12 @@ public class SamplesApplication extends Application {
 		imageFileHelper.init(getString(R.string.app_directory), getString(R.string.images_directory));
 	}
 
+	/**
+	 * Easy wrapper around ServiceLocator getApp/getAppContext functionality
+	 * to get this instance statically throughout the app
+	 * @return
+	 */
+	public static SamplesApplication get() {
+		return ServiceLocator.getApp(SamplesApplication.class);
+	}
 }
