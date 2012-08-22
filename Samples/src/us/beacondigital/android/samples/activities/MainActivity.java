@@ -1,14 +1,11 @@
 package us.beacondigital.android.samples.activities;
 
 import us.beacondigital.android.samples.R;
-import us.beacondigital.android.samples.app.SamplesApplication;
 import us.beacondigital.utils.ImageInfo;
 import us.beacondigital.utils.ImageInfo.ImageDescriptor;
 import us.beacondigital.utils.RemoteImageView;
-import us.beacondigital.utils.ServiceLocator;
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
