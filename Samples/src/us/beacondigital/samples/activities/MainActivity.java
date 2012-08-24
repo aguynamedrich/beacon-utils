@@ -1,6 +1,6 @@
-package us.beacondigital.android.samples.activities;
+package us.beacondigital.samples.activities;
 
-import us.beacondigital.android.samples.R;
+import us.beacondigital.samples.R;
 import us.beacondigital.utils.ImageInfo;
 import us.beacondigital.utils.ImageInfo.ImageDescriptor;
 import us.beacondigital.utils.RemoteImageView;

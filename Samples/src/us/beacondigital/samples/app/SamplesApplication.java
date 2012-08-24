@@ -1,6 +1,6 @@
-package us.beacondigital.android.samples.app;
+package us.beacondigital.samples.app;
 
-import us.beacondigital.android.samples.R;
+import us.beacondigital.samples.R;
 import us.beacondigital.utils.ImageFileHelper;
 import us.beacondigital.utils.ServiceLocator;
 import android.app.Application;
