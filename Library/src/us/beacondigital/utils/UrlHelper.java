@@ -11,7 +11,7 @@ public class UrlHelper {
 	 * @return
 	 */
 	public static String addParam(String url, String paramKey, String paramValue) {
-		boolean isFirst = url.indexOf("?") > -1;
+		boolean isFirst = url.indexOf("?") == -1;
 		String newUrl = String.format("%s%s%s=%s",
 				url,
 				((isFirst) ? "?" : "&"),

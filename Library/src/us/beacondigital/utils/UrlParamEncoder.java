@@ -22,7 +22,7 @@ public class UrlParamEncoder {
     }
 
     private static boolean isUnsafe(char ch) {
-    	boolean isUnsafe = true;
+    	boolean isUnsafe = false;
         if (ch > 128 || ch < 0) {
         	isUnsafe = true;
         }
