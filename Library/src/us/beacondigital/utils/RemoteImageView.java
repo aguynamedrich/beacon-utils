@@ -3,6 +3,7 @@ package us.beacondigital.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -52,6 +53,14 @@ public class RemoteImageView extends LinearLayout {
 		imageView.setScaleType(ScaleType.CENTER);
 		imageView.setAdjustViewBounds(true);
 		addView(imageView);
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void setImageBackground(Drawable background) {
+		if(imageView != null && background != null) {
+			// The following method isn't deprecated until Jelly Bean
+			imageView.setBackgroundDrawable(background);
+		}
 	}
 	
 	public void setImageInfo(ImageInfo info)
