@@ -1,8 +1,10 @@
 package us.beacondigital.samples.app;
 
 import us.beacondigital.samples.R;
-import us.beacondigital.utils.ImageFileHelper;
+import us.beacondigital.utils.ImageCacheHelper;
+import us.beacondigital.utils.RemoteImageView;
 import us.beacondigital.utils.ServiceLocator;
+import us.beacondigital.utils.ImageCacheHelper.StorageLocation;
 import android.app.Application;
 
 public class SamplesApplication extends Application {
@@ -28,8 +30,11 @@ public class SamplesApplication extends Application {
 		 * in theory hide these images from the user's gallery application(s).  If this is not your 
 		 * desired scenario, use a directory name that does not start with a dot.
 		 */
-		ImageFileHelper imageFileHelper = ServiceLocator.resolve(ImageFileHelper.class);
-		imageFileHelper.init(getString(R.string.app_directory), getString(R.string.images_directory));
+		ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+		imageCacheHelper.setStorageLocation(StorageLocation.ExternalStorage);
+		imageCacheHelper.init(getString(R.string.app_directory), getString(R.string.images_directory));
+		
+		RemoteImageView.setLoggingEnabled(true);
 	}
 
 	/**

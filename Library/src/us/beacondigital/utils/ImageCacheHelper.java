@@ -16,25 +16,54 @@ import android.os.Environment;
  * @author Rich
  *
  */
-public class ImageFileHelper {
+public class ImageCacheHelper {
 	
+	public static String DefaultRootDirectory = "beacon_digital";
+	
+	public enum StorageLocation {
+		ApplicationCache,
+		ExternalStorage
+	}
+	
+	private StorageLocation storageLocation = StorageLocation.ExternalStorage;
 	private boolean isInitialized = false;
-	File imagesDir = null;
+	File cacheDirectory = null;
+	String rootPath = DefaultRootDirectory;
+	String imagesPath = null;
 	
 	/**
 	 * 
 	 * @param root
 	 */
-	public void init(String root, String subDir) {
-		File rootDir = new File(Environment.getExternalStorageDirectory(), root);
-		if(!StringUtils.isNullOrEmpty(subDir)) {
-			imagesDir = new File(rootDir, subDir);
+	public void init(String rootPath, String imagesPath) {
+		
+		this.rootPath = rootPath;
+		this.imagesPath = imagesPath;
+
+		File storage = null;
+		switch(storageLocation) {
+		case ApplicationCache:
+			storage = ServiceLocator.getAppContext().getCacheDir();
+			break;
+		case ExternalStorage:
+			storage = Environment.getExternalStorageDirectory();
+			break;
+		}
+		
+		File rootDir = new File(storage, rootPath);
+		if(!StringUtils.isNullOrEmpty(imagesPath)) {
+			cacheDirectory = new File(rootDir, imagesPath);
 		}
 		else {
-			imagesDir = rootDir;
+			cacheDirectory = rootDir;
 		}
-		imagesDir.mkdirs();
+		cacheDirectory.mkdirs();
 		isInitialized = true;
+	}
+	
+	public void setStorageLocation(StorageLocation location) {
+		storageLocation = location;
+		init(rootPath, imagesPath);
 	}
 	
 	public boolean saveImage(Bitmap bitmap, ImageInfo info) {
@@ -44,8 +73,8 @@ public class ImageFileHelper {
 		if(isInitialized) {
 			try
 			{
-				imagesDir.mkdirs(); // Juuuuuust in case
-				File imageFile = new File(imagesDir, info.toString());
+				cacheDirectory.mkdirs(); // Juuuuuust in case
+				File imageFile = new File(cacheDirectory, info.toString());
 				fos = new FileOutputStream(imageFile);
 				success = bitmap.compress(info.getCompressFormat(), info.getQuality(), fos);
 			}
@@ -65,8 +94,8 @@ public class ImageFileHelper {
 		if(isInitialized) {
 			try
 			{
-				imagesDir.mkdirs(); // Juuuuuust in case
-				File imageFile = new File(imagesDir, info.toString());
+				cacheDirectory.mkdirs(); // Juuuuuust in case
+				File imageFile = new File(cacheDirectory, info.toString());
 				fis = new FileInputStream(imageFile);
 				bitmap = BitmapFactory.decodeStream(fis);
 			}
@@ -79,5 +108,7 @@ public class ImageFileHelper {
 		
 		return bitmap;
 	}
+	
+	public File getCacheDirectory() { return cacheDirectory; }
 
 }

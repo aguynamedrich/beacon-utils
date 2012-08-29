@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.http.AndroidHttpClient;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -17,6 +18,8 @@ import android.widget.LinearLayout;
  *
  */
 public class RemoteImageView extends LinearLayout {
+	
+	private static boolean loggingEnabled = false;
 	
 	Context context;
 	BitmapDrawable bitmapDrawable;
@@ -33,6 +36,10 @@ public class RemoteImageView extends LinearLayout {
 		super(context, attrs);
 		this.context = context;		
 		initImageView();
+	}
+	
+	public static void setLoggingEnabled(boolean loggingEnabled) {
+		RemoteImageView.loggingEnabled = loggingEnabled;
 	}
 	
 	private void initImageView()
@@ -90,17 +97,20 @@ public class RemoteImageView extends LinearLayout {
 	 */
 	public void refresh()
 	{
-		ImageFileHelper imageFileHelper = ServiceLocator.resolve(ImageFileHelper.class);
-		Bitmap bmp = imageFileHelper.loadImage(imageInfo);
+		ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+		Bitmap bmp = imageCacheHelper.loadImage(imageInfo);
 		if(bmp != null)
-		{			
+		{
+			log("refresh: Image loaded from cache, %s", imageInfo.toString());
+			log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
+			
 			hasImage = true;
 			bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
 			imageView.setImageDrawable(bitmapDrawable);
 			setBackgroundResource(0);
 		}
 	}
-	
+
 	public void setAsync(boolean async) { isAsync = async; }
 	public void setScaleType(ScaleType scaleType)
 	{
@@ -117,13 +127,16 @@ public class RemoteImageView extends LinearLayout {
 	 */
 	public void request()
 	{
-		ImageFileHelper imageFileHelper = ServiceLocator.resolve(ImageFileHelper.class);
+		ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
 		if(ImageInfoValidator.isValid(imageInfo))
 		{
 			// attempt to load from local first
-			Bitmap bmp = imageFileHelper.loadImage(imageInfo);
+			Bitmap bmp = imageCacheHelper.loadImage(imageInfo);
 			if(bmp != null)
 			{
+				log("request: Image loaded from cache, %s", imageInfo.toString());
+				log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
+				
 				hasImage = true;
 				bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
 				imageView.setImageDrawable(bitmapDrawable);
@@ -155,7 +168,7 @@ public class RemoteImageView extends LinearLayout {
 		{
 			public void run()
 			{
-				ImageFileHelper imageFileHelper = ServiceLocator.resolve(ImageFileHelper.class);
+				ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
 				AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 				
 				Bitmap bmp = HttpHelper.getImage(url, client);
@@ -163,8 +176,11 @@ public class RemoteImageView extends LinearLayout {
 				if(bmp != null)
 				{
 					// Save locally to SD
-					if(cacheToFile)
-						imageFileHelper.saveImage(bmp, imageInfo);
+					if(cacheToFile) {
+						boolean saved = imageCacheHelper.saveImage(bmp, imageInfo);
+						log("File saved: %b, %s", saved, imageInfo);
+						log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
+					}
 					hasImage = true;
 					
 					// Load bitmap for display on UI thread
@@ -172,12 +188,24 @@ public class RemoteImageView extends LinearLayout {
 					handler.post(new Runnable() {
 						
 						public void run() {
+							log("requestInline: Image loaded from remote resource, %s", imageInfo.toString());
 							imageView.setImageDrawable(bitmapDrawable);
 						}
 					});
 				}
 			}
 		}.start();
+	}
+	
+	/**
+	 * Local method for logging when statically enabled from application (off by default
+	 * @param format
+	 * @param params
+	 */
+	private void log(String format, Object... params) {
+		if(loggingEnabled) {
+			Log.v(getClass().getSimpleName(), String.format(format, params));
+		}
 	}
 
 }
