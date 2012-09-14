@@ -63,5 +63,59 @@ public class JSONHelper {
 		catch (JSONException e) { }
 		return val;
 	}
+	
+	public static void put(JSONObject obj, String name, String value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
+	
+	public static void put(JSONObject obj, String name, int value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
+	
+	public static void put(JSONObject obj, String name, long value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
+	
+	public static void put(JSONObject obj, String name, double value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
+	
+	public static void put(JSONObject obj, String name, float value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
+	
+	public static void put(JSONObject obj, String name, boolean value) {
+		if(obj != null && !StringUtils.isNullOrEmpty(name)) {
+			try {
+				obj.put(name, value);
+			}
+			catch (JSONException e) { }
+		}
+	}
 
 }

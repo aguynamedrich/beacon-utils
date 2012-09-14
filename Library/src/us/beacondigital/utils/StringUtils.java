@@ -10,6 +10,8 @@ public class StringUtils {
 	
 	private final static String EmailRegex = "^[_a-z0-9-+]+(\\.[_a-z0-9-+]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,8})$";
 	private final static String URLRegex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+	private final static String AllDigitsRegex = "^\\d+$";
+	private final static String NumericRegex = "^-?\\d*(\\.\\d+)?$";
 	
 	/**
 	 * Utility method for pulling plain text from an InputStream object
@@ -70,6 +72,28 @@ public class StringUtils {
 		}
 		catch(Exception ex) { }
 		return data;
+	}
+
+	public static boolean isPositiveInteger(String input) {
+
+		if(StringUtils.isNullOrEmpty(input))
+		{
+			return false;
+		}
+
+		return input.matches(AllDigitsRegex) && Integer.parseInt(input) > 0;
+		
+	}
+
+	public static boolean isNumeric(String input) {
+
+		if(StringUtils.isNullOrEmpty(input))
+		{
+			return false;
+		}
+
+		return input.matches(NumericRegex);
+		
 	}
 
 }
