@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -71,6 +72,18 @@ public class HttpHelper
 		}
 		catch(Exception ex) { }
 		return bmp;
+	}
+	
+	/**
+	 * Simplest possible way to read a string from a url using a single-use DefaultHttpClient
+	 * @param url
+	 * @return
+	 */
+	public static String read(String url) {
+		DefaultHttpClient client = HttpClientProvider.get();
+		String body = getText(url, client);
+		IOUtils.safeClose(client);
+		return body;
 	}
 	
 	/**
