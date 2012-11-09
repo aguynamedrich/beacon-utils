@@ -33,16 +33,16 @@ public class MyApplication extends Application {
 ### To use ServiceLocator as a dependency container
 ```java
 		
-		// To register a concrete implementation on an interface...
-		ServiceLocator.register(IDataProvider.class, MockDataProvider.class);
-		
-		// To resolve a concrete implementation for the interface you need...
-		IDataProvider dataProvider = ServiceLocator.resolve(IDataProvider.class);
-		// And now you can use your object...
-		DataObject obj = dataProvider.getDataObject();
-		
-		// To resolve a lazy-loaded singleton object...
-		ServiceDataCache serviceDataCache = ServiceLocator.resolve(ServiceDataCache.class);
+// To register a concrete implementation on an interface...
+ServiceLocator.register(IDataProvider.class, MockDataProvider.class);
+
+// To resolve a concrete implementation for the interface you need...
+IDataProvider dataProvider = ServiceLocator.resolve(IDataProvider.class);
+// And now you can use your object...
+DataObject obj = dataProvider.getDataObject();
+
+// To resolve a lazy-loaded singleton object...
+ServiceDataCache serviceDataCache = ServiceLocator.resolve(ServiceDataCache.class);
 ```
 
 ## RemoteImageView
