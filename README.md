@@ -30,6 +30,21 @@ public class MyApplication extends Application {
     	ServiceLocator.init(this);
 ``` 
 
+### To use ServiceLocator as a dependency container
+```java
+		
+		// To register a concrete implementation on an interface...
+		ServiceLocator.register(IDataProvider.class, MockDataProvider.class);
+		
+		// To resolve a concrete implementation for the interface you need...
+		IDataProvider dataProvider = ServiceLocator.resolve(IDataProvider.class);
+		// And now you can use your object...
+		DataObject obj = dataProvider.getDataObject();
+		
+		// To resolve a lazy-loaded singleton object...
+		ServiceDataCache serviceDataCache = ServiceLocator.resolve(ServiceDataCache.class);
+```
+
 ## RemoteImageView
 
 RemoteImageView allows you to easily load images from web url's without having to do the extra work of downloading and caching the files.  There are several classes that compliment RemoteImageView that make it easy to set up your caching layer and describing the images to avoid having name clashes of your files in cache.
