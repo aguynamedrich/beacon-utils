@@ -1,4 +1,4 @@
-beacon-utils
+Beacon Utils for Android
 ============
 
 Beacon Utils is a collection of common utilities that make developing Android apps easier.
@@ -6,6 +6,16 @@ Beacon Utils is a collection of common utilities that make developing Android ap
 ## ServiceLocator
 
 ServiceLocator is a dependency container of sorts that you can use to preload, lazy load and discover utility and helper classes that are used throughout your application.  ServiceLocator removes the need for the various classes in your application to be aware of each other and allows classes without a hierarchical relationship to share common functionality without maintaining references to one another.  ServiceLocator also supports declaring interface implementations at runtime so you can program to an interface in cases where you may need to swap implementations based on your development cycle or deployment target.
+
+###### To initialize ServiceLocator, pass an instance of your Application class on application launch
+```java
+public class MyApplication extends Application {
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();        
+    	ServiceLocator.init(this);
+``` 
 
 ## RemoteImageView
 
