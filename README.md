@@ -24,10 +24,10 @@ These classes contain utility methods for common tasks that you are likely to en
 boolean empty = StringUtils.isNullOrEmpty(data);
 
 // To read the body of an HttpResponse into a String...
-String response = StringUtils.readStream(response);
+String body = StringUtils.readStream(response);
 
 // To read an InputStream into a String...
-String response = StringUtils.readStream(inputStream);
+String content = StringUtils.readStream(inputStream);
 
 // To make sure a Cursor object is closed without the need to check for null or handle an exception...
 IOUtils.safeClose(cursor);
