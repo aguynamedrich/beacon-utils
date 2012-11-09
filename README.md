@@ -18,3 +18,23 @@ UrlHelper contains a collection of convenience methods for quickly and easily re
 ## StringUtils, IOUtils, HttpUtils, JSONHelper, Encrypt, UrlParamEncoder
 
 These classes contain utility methods for common tasks that you are likely to encounter during Android development.  Most functionality is exposed as single static method calls for the purpose of making your code easier to read, write and understand.
+
+```java
+// To find out if a String contains enough data to work with...
+boolean empty = StringUtils.isNullOrEmpty(data);
+
+// To read the body of an HttpResponse into a String...
+String response = StringUtils.readStream(response);
+
+// To read an InputStream into a String...
+String response = StringUtils.readStream(inputStream);
+
+// To make sure a Cursor object is closed without the need to check for null or handle an exception...
+IOUtils.safeClose(cursor);
+
+// To determine if the status code of an HttpResponse is in the 200 range...
+HttpUtils.isOK(response);
+
+// To determine if the status code of an HttpResponse is in the 400 range...
+HttpUtils.isUnauthorized(response);
+```
