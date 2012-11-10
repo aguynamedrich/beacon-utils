@@ -8,7 +8,7 @@ Beacon Utils is a collection of common utilities that make developing Android ap
 ServiceLocator is a dependency container of sorts that you can use to preload, lazy load and discover utility and helper classes that are used throughout your application.  ServiceLocator removes the need for the various classes in your application to be aware of each other and allows classes without a hierarchical relationship to share common functionality without maintaining references to one another.  ServiceLocator also supports declaring interface implementations at runtime so you can program to an interface in cases where you may need to swap implementations based on your development cycle or deployment target.
 
 ### To initialize ServiceLocator
-Pass an instance of your Application to ServiceLocator when app is launched.
+Pass an instance of your Application to ServiceLocator when app is launched.  The example below is an example of doing this from a custom Application class.
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yourdomain.application"
@@ -48,6 +48,30 @@ ServiceDataCache serviceDataCache = ServiceLocator.resolve(ServiceDataCache.clas
 ## RemoteImageView
 
 RemoteImageView allows you to easily load images from web url's without having to do the extra work of downloading and caching the files.  There are several classes that compliment RemoteImageView that make it easy to set up your caching layer and describing the images to avoid having name clashes of your files in cache.
+
+### Initial setup for cache and logging preferences
+These settings allow you to control where the downloaded files are cached as well as to turn logging on and off.  I typically run this setup once in the Application class on first launch (onCreate).
+```java
+ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+imageCacheHelper.init(ImageCacheDir, ImageCacheSubDir);
+imageCacheHelper.setStorageLocation(StorageLocation.ApplicationCache);
+RemoteImageView.setLoggingEnabled(true);
+```
+### Resolve RemoteImageView items in your Activity, initialize your ImageInfo objects, and trigger async download and UI refresh
+The ImageInfo and ImageDescriptor classes are used to build a unique cache key to avoid name clashes.  You can also bypass caching images to file so you can control which images are refreshed on every request.
+```java		
+myFirstImage = (RemoteImageView) findViewById(R.id.myFirstImage);
+mySecondImage = (RemoteImageView) findViewById(R.id.mySecondImage);
+
+ImageInfo firstImageInfo = new ImageInfo(ImageDescriptor.create(dataObj1.getTitle()), dataObj1.getUrl());
+myFirstImage.setImageInfo(firstImageInfo);
+myFirstImage.setCacheToFile(false);
+myFirstImage.request();
+
+ImageInfo secondImageInfo = new ImageInfo(ImageDescriptor.create(dataObj2.getTitle()), dataObj2.getUrl());
+mySecondImage.setImageInfo(secondImageInfo);
+mySecondImage.request();
+```
 
 ## UrlHelper
 
