@@ -29,6 +29,15 @@ public class MyApplication extends Application {
 		super.onCreate();        
     	ServiceLocator.init(this);
 ``` 
+Or, if you're not using a custom Application subclass, you can initialize ServiceLocator from within your MainActivity
+```java
+public class MainActivity extends Activity {
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+    	ServiceLocator.init(getApplicationContext());
+```
 
 ### To use ServiceLocator as a dependency container
 ```java
@@ -43,6 +52,23 @@ DataObject obj = dataProvider.getDataObject();
 
 // To resolve a lazy-loaded singleton object...
 ServiceDataCache serviceDataCache = ServiceLocator.resolve(ServiceDataCache.class);
+```
+
+### To use ServiceLocator to retrieve your Application context from anywhere in your app
+If you need a reference to your current Application context from within an Activity, you can simply call getAppliationContext().
+However, you may need a reference to your Application context from custom classes that you've created that don't inherit this method from the Context superclass.
+For example, you may need access to your application's resources and assets from inside of a custom helper class, or you may need to access your application's private files or cache directory.
+Here are examples of both cases.
+```java
+// If you just need access to methods on the Application class...
+Application app = ServiceLocator.getAppContext();
+Resources res = app.getResources();
+File filesDir = app.getFilesDir();
+File cacheDir = app.getCacheDir();
+
+// But if you need specific methods on your custom application class...
+MyApplication app = ServiceLocator.getApp(MyApplication.class);
+app.customMethod();
 ```
 
 ## RemoteImageView
