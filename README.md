@@ -99,9 +99,13 @@ mySecondImage.setImageInfo(secondImageInfo);
 mySecondImage.request();
 ```
 
+## HttpHelper
+
+HttpHelper contains a collection of convenience methods for quickly and easily retrieving data from the web.  Currently, most HTTP verbs are supported and there are overloaded methods for getting a String, Bitmap, HttpResponse or just the headers from a resource on the web.
+
 ## UrlHelper
 
-UrlHelper contains a collection of convenience methods for quickly and easily retrieving data from the web.  Currently, most HTTP verbs are supported and there are overloaded methods for getting a String, Bitmap, HttpResponse or just the headers from a resource on the web.
+UrlHelper contains a number of overloaded methods to easily add query string parameters of any basic Java value type to a url with a single call.
 
 ## StringUtils, IOUtils, HttpUtils, JSONHelper, Encrypt, UrlParamEncoder
 
