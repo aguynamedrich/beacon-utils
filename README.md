@@ -103,6 +103,34 @@ mySecondImage.request();
 
 HttpHelper contains a collection of convenience methods for quickly and easily retrieving data from the web.  Currently, most HTTP verbs are supported and there are overloaded methods for getting a String, Bitmap, HttpResponse or just the headers from a resource on the web.
 
+```java
+// To load an image from a remote URL...
+String imageUrl = "https://a248.e.akamai.net/assets.github.com/images/modules/about_page/octocat.png";
+Bitmap bitmap = HttpHelper.getImage(imageUrl);
+
+// To load the contents of a web page...
+String webPageUrl = "http://www.google.com";
+String webPageBody = HttpHelper.read(webPageUrl);
+
+// To load the contents of an api endpoint...
+String jsonDataUrl = "http://en.gravatar.com/aguynamedrich.json";
+String jsonData = HttpHelper.read(jsonDataUrl);
+
+// To get an HttpResponse from a url, check the status code, and read the response
+// using a combination of HttpClientProvider, StringUtils, IOUtils and HttpHelper
+String url = "http://www.google.com";
+HttpClient client = HttpClientProvider.get();
+HttpResponse response = HttpHelper.getResponse(url, client);
+if(HttpUtils.isOK(response)) {
+	String body = StringUtils.readStream(response);
+	processResult(body);
+}
+else {
+	processError(response.getStatusLine().getStatusCode());
+}
+IOUtils.safeClose(client);
+```
+
 ## UrlHelper
 
 UrlHelper contains a number of overloaded methods to easily add query string parameters of any basic Java value type to a url with a single call.

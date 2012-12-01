@@ -39,22 +39,6 @@ public class HttpHelper
 	public final static String ContentTypeJson = "application/json";
 	public final static String ContentTypeJpeg = "image/jpeg";
 	public final static String ContentTypeMultipartFormData = "multipart/form-data";
-
-	/**
-	 * Utility method for pulling plain text out of an HttpResponse
-	 * @param response - The HttpResponse received from a url
-	 * @return text content as a String
-	 */
-	public static String getText(HttpResponse response)
-	{
-		String text = "";
-		try
-		{
-			text = StringUtils.readStream(response.getEntity().getContent());
-		}
-		catch(Exception ex) { }
-		return text;
-	}
 	
 	/**
 	 * Utility method for building a Bitmap object out of the text received from a url
@@ -72,6 +56,18 @@ public class HttpHelper
 		}
 		catch(Exception ex) { }
 		return bmp;
+	}
+	
+	/**
+	 * Simplest way to 
+	 * @param url
+	 * @return
+	 */
+	public static Bitmap getImage(String url) {
+		DefaultHttpClient client = HttpClientProvider.get();
+		Bitmap image = getImage(url, client);
+		IOUtils.safeClose(client);
+		return image;
 	}
 	
 	/**
@@ -94,7 +90,7 @@ public class HttpHelper
 	 */
 	public static String getText(String url, HttpClient client)
 	{
-		return getText(getResponse(url, client));
+		return StringUtils.readStream(getResponse(url, client));
 	}
 	
 	/**

@@ -178,8 +178,7 @@ public class RemoteImageView extends LinearLayout {
 			public void run()
 			{
 				ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-				AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-				
+				AndroidHttpClient client = AndroidHttpClient.newInstance("Android");				
 				Bitmap bmp = HttpHelper.getImage(url, client);
 				client.close();
 				if(bmp != null)
