@@ -13,8 +13,9 @@ public class Task<TParam, TProgress, TResult> extends AsyncTask<TParam, TProgres
 		this.listener = listener;
 	}
 	
-	public void setListener(TaskListener<TProgress, TResult> listener) {
+	public Task<TParam, TProgress, TResult> setListener(TaskListener<TProgress, TResult> listener) {
 		this.listener = listener;
+		return this;
 	}
 	
 	@Override
