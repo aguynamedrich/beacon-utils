@@ -5,9 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
-import android.os.Handler;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -20,23 +23,70 @@ import android.widget.LinearLayout;
  */
 public class RemoteImageView extends LinearLayout {
 	
-	private static boolean loggingEnabled = false;
+	protected static boolean loggingEnabled = false;
 	
 	Context context;
 	BitmapDrawable bitmapDrawable;
 	ImageView imageView;
 	ImageInfo imageInfo;
 	
-	boolean isAsync = false;
 	boolean hasImage = false;
 	boolean cacheToFile = true;
 	
-	private final Handler handler = new Handler();
+	DiskLoadTask diskLoadTask = null;
+	RemoteLoadTask remoteLoadTask = null;
+	
+//	private final Handler handler = new Handler();
+	
+	/**
+	 * Allows the consumer to declare a desired aspect ratio
+	 * which we use to resize in onSizeChanged
+	 * @author Rich
+	 *
+	 */
+	public enum AspectRatio {
+		Default (1, 1),
+		Square (1, 1),
+		Widescreen16x9 (16, 9),
+		Widescreen4x3 (4, 3);
+		
+		private int width, height;
+		private AspectRatio(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+		public int getWidth() { return width; }
+		public int getHeight() { return height; }
+	}
+	private AspectRatio aspectRatio = AspectRatio.Default;
 
 	public RemoteImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;		
 		initImageView();
+		initResizeLogic();
+	}
+	
+	private void initResizeLogic() {
+		ViewTreeObserver obs = getViewTreeObserver();
+		obs.addOnPreDrawListener(new OnPreDrawListener() {
+			
+			public boolean onPreDraw() {
+				log("onPreDraw");
+				if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
+					int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
+					ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+					lp.height = height;
+					imageView.setLayoutParams(lp);
+				}
+				getViewTreeObserver().removeOnPreDrawListener(this);
+				return true;
+			}
+		});
+	}
+
+	public void setAspectRatio(AspectRatio aspectRatio) {
+		this.aspectRatio = aspectRatio;
 	}
 	
 	public static void setLoggingEnabled(boolean loggingEnabled) {
@@ -66,12 +116,15 @@ public class RemoteImageView extends LinearLayout {
 	public void setImageInfo(ImageInfo info)
 	{
 		if(imageInfo != null)
-		{			
+		{
 			// remove old image
 			if(imageView.getDrawable() != null && imageView.getDrawable() == bitmapDrawable)
 			{
+				log("setImageInfo cleaning up");
+				log(info.toString());
+				
 				imageView.setImageDrawable(null);
-				bitmapDrawable.getBitmap().recycle();
+//				bitmapDrawable.getBitmap().recycle();
 				bitmapDrawable = null;
 			}
 		}
@@ -120,7 +173,6 @@ public class RemoteImageView extends LinearLayout {
 		}
 	}
 
-	public void setAsync(boolean async) { isAsync = async; }
 	public void setScaleType(ScaleType scaleType)
 	{
 		imageView.setScaleType(scaleType);
@@ -136,73 +188,18 @@ public class RemoteImageView extends LinearLayout {
 	 */
 	public void request()
 	{
-		ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+		log("request");
+		log(imageInfo.toString());
 		if(ImageInfoValidator.isValid(imageInfo))
 		{
-			// attempt to load from local first
-			Bitmap bmp = imageCacheHelper.loadImage(imageInfo);
-			if(bmp != null)
-			{
-				log("request: Image loaded from cache, %s", imageInfo.toString());
-				log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
-				
-				hasImage = true;
-				bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
-				imageView.setImageDrawable(bitmapDrawable);
+			log("ImageInfo is valid");
+			if (diskLoadTask != null && !diskLoadTask.isCancelled()) {
+				diskLoadTask.cancel(true);
 			}
-			else
-			{
-				if(isAsync)
-				{
-//					requestAsync();
-				}
-				else
-				{
-					requestInline();
-				}
-			}
+			diskLoadTask = new DiskLoadTask();
+			diskLoadTask.execute(imageInfo);
 			
 		}
-	}
-	
-	/**
-	 * Request inline does it's own downloading and posts back to the UI thread when complete.
-	 * This is used for images displayed on screens that won't be scrolling images off the screen so quickly
-	 */
-	private void requestInline()
-	{
-		final String url = imageInfo.getUrl();
-		
-		new Thread()
-		{
-			public void run()
-			{
-				ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-				AndroidHttpClient client = AndroidHttpClient.newInstance("Android");				
-				Bitmap bmp = HttpHelper.getImage(url, client);
-				client.close();
-				if(bmp != null)
-				{
-					// Save locally to SD
-					if(cacheToFile) {
-						boolean saved = imageCacheHelper.saveImage(bmp, imageInfo);
-						log("File saved: %b, %s", saved, imageInfo);
-						log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
-					}
-					hasImage = true;
-					
-					// Load bitmap for display on UI thread
-					bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
-					handler.post(new Runnable() {
-						
-						public void run() {
-							log("requestInline: Image loaded from remote resource, %s", imageInfo.toString());
-							imageView.setImageDrawable(bitmapDrawable);
-						}
-					});
-				}
-			}
-		}.start();
 	}
 	
 	/**
@@ -214,6 +211,75 @@ public class RemoteImageView extends LinearLayout {
 		if(loggingEnabled) {
 			Log.v(getClass().getSimpleName(), String.format(format, params));
 		}
+	}
+	
+	private class DiskLoadTask extends AsyncTask<ImageInfo, Void, Bitmap> {
+		
+		ImageInfo info = null;
+
+		@Override
+		protected Bitmap doInBackground(ImageInfo... params) {
+			
+			// attempt to load from local first
+			info = params[0];
+			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+			Bitmap bitmap = imageCacheHelper.loadImage(info);
+			return bitmap;
+		}
+		
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			if(bitmap != null)
+			{
+				hasImage = true;
+				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+				imageView.setImageDrawable(bitmapDrawable);
+			}
+			else
+			{
+				if (remoteLoadTask != null && !remoteLoadTask.isCancelled()) {
+					remoteLoadTask.cancel(true);
+				}
+				remoteLoadTask = new RemoteLoadTask();
+				remoteLoadTask.execute(info);
+			}
+		}
+		
+	}
+	
+	private class RemoteLoadTask extends AsyncTask<ImageInfo, Void, Bitmap> {
+
+		@Override
+		protected Bitmap doInBackground(ImageInfo... params) {
+			ImageInfo info = params[0];
+			String url = info.getUrl();
+			log(url);
+			
+			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");				
+			Bitmap bitmap = HttpHelper.getImage(url, client);
+			client.close();
+			if(bitmap != null)
+			{
+				// Save locally to SD
+				if(cacheToFile) {
+					boolean saved = imageCacheHelper.saveImage(bitmap, info);
+					log("File saved: %b, %s", saved, info);
+					log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
+				}
+				hasImage = true;
+			}
+			return bitmap;
+		}
+		
+		@Override
+		protected void onPostExecute(final Bitmap bitmap) {
+			if (bitmap != null) {
+				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+				imageView.setImageDrawable(bitmapDrawable);
+			}
+		}
+		
 	}
 
 }

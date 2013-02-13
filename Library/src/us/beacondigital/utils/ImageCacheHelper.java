@@ -6,9 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.support.v4.util.LruCache;
+import android.util.Log;
 
 /**
  * Class used by the RemoteImageView and external image downloading mechanisms to save remote images to 
@@ -30,6 +34,24 @@ public class ImageCacheHelper {
 	File cacheDirectory = null;
 	String rootPath = DefaultRootDirectory;
 	String imagesPath = null;
+	MemCache memCache = null;
+	
+	/**
+	 * 
+	 * @param rootPath
+	 * @param imagesPath
+	 * @param memCacheSize Percentage of total memory class from the ActivityManager that should be used for remote image caching.
+	 * Should be between 0.0 and 0.5 or we will throw an exception
+	 */
+	public void init(String rootPath, String imagesPath, float memCacheSize) {
+		if (memCacheSize < 0f || memCacheSize > 0.5f)
+			throw new IllegalArgumentException("Cache size should be a positive float no greater than 0.5");
+		
+		init(rootPath, imagesPath);
+		ActivityManager am = (ActivityManager) ServiceLocator.getAppContext().getSystemService(Context.ACTIVITY_SERVICE);
+		int memClassBytes = am.getMemoryClass() * 1024 * 1024;
+		memCache = new MemCache((int) (memClassBytes * memCacheSize));
+	}
 	
 	/**
 	 * 
@@ -67,6 +89,9 @@ public class ImageCacheHelper {
 	}
 	
 	public boolean saveImage(Bitmap bitmap, ImageInfo info) {
+		if (memCache != null)
+			memCache.put(info.toString(), bitmap);
+		
 		boolean success = false;
 		FileOutputStream fos = null;
 
@@ -89,8 +114,18 @@ public class ImageCacheHelper {
 	}
 	
 	public Bitmap loadImage(ImageInfo info) {
+		
 		FileInputStream fis = null;
 		Bitmap bitmap = null;
+
+		if (memCache != null) {
+			bitmap = memCache.get(info.toString());
+			if (bitmap != null) {
+				log("memory cache hit for " + info.toString());
+				return bitmap;
+			}
+		}
+		
 		if(isInitialized) {
 			try
 			{
@@ -109,6 +144,38 @@ public class ImageCacheHelper {
 		return bitmap;
 	}
 	
+	public void flushCache() {
+		if (cacheDirectory != null && cacheDirectory.isDirectory()) {
+			File[] files = cacheDirectory.listFiles();
+			for (File file : files) {
+				if (file.isFile()) {
+					boolean deleted = file.delete();
+					Log.d(
+							ImageCacheHelper.class.getSimpleName(),
+							String.format("flushCache::deleting %s. succeeded:%b", file.getName(), deleted));
+				}
+			}
+		}
+	}
+	
 	public File getCacheDirectory() { return cacheDirectory; }
+	
+	private class MemCache extends LruCache<String, Bitmap> {
+
+		public MemCache(int maxSizeBytes) {
+			super(maxSizeBytes);
+		}
+	}
+	
+	/**
+	 * Local method for logging when statically enabled from application (off by default
+	 * @param format
+	 * @param params
+	 */
+	private void log(String format, Object... params) {
+		if(RemoteImageView.loggingEnabled) {
+			Log.v(getClass().getSimpleName(), String.format(format, params));
+		}
+	}
 
 }
