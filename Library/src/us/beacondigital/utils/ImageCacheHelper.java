@@ -174,7 +174,7 @@ public class ImageCacheHelper {
 	 */
 	private void log(String format, Object... params) {
 		if(RemoteImageView.loggingEnabled) {
-			Log.v(getClass().getSimpleName(), String.format(format, params));
+			Log.v(RemoteImageView.class.getSimpleName(), String.format(format, params));
 		}
 	}
 

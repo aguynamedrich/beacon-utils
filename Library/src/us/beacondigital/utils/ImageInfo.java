@@ -1,5 +1,6 @@
 package us.beacondigital.utils;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap.CompressFormat;
 
 /**
@@ -154,6 +155,7 @@ public class ImageInfo {
 		return extension;
 	}
 
+	@SuppressLint("DefaultLocale")
 	@Override
 	public String toString() {
 		String extension = null;
@@ -177,6 +179,15 @@ public class ImageInfo {
 		if(ext == Extension.Png)
 			format = CompressFormat.PNG;
 		return format;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof ImageInfo) {
+			return toString().equalsIgnoreCase(((ImageInfo) o).toString());
+		}
+		else
+			return super.equals(0);
 	}
 
 }

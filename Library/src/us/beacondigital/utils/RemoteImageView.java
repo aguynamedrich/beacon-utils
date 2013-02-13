@@ -72,7 +72,6 @@ public class RemoteImageView extends LinearLayout {
 		obs.addOnPreDrawListener(new OnPreDrawListener() {
 			
 			public boolean onPreDraw() {
-				log("onPreDraw");
 				if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
 					int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
 					ViewGroup.LayoutParams lp = imageView.getLayoutParams();
@@ -120,11 +119,7 @@ public class RemoteImageView extends LinearLayout {
 			// remove old image
 			if(imageView.getDrawable() != null && imageView.getDrawable() == bitmapDrawable)
 			{
-				log("setImageInfo cleaning up");
-				log(info.toString());
-				
 				imageView.setImageDrawable(null);
-//				bitmapDrawable.getBitmap().recycle();
 				bitmapDrawable = null;
 			}
 		}
@@ -163,9 +158,6 @@ public class RemoteImageView extends LinearLayout {
 		Bitmap bmp = imageCacheHelper.loadImage(imageInfo);
 		if(bmp != null)
 		{
-			log("refresh: Image loaded from cache, %s", imageInfo.toString());
-			log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
-			
 			hasImage = true;
 			bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
 			imageView.setImageDrawable(bitmapDrawable);
@@ -188,11 +180,8 @@ public class RemoteImageView extends LinearLayout {
 	 */
 	public void request()
 	{
-		log("request");
-		log(imageInfo.toString());
 		if(ImageInfoValidator.isValid(imageInfo))
 		{
-			log("ImageInfo is valid");
 			if (diskLoadTask != null && !diskLoadTask.isCancelled()) {
 				diskLoadTask.cancel(true);
 			}
@@ -207,7 +196,7 @@ public class RemoteImageView extends LinearLayout {
 	 * @param format
 	 * @param params
 	 */
-	private void log(String format, Object... params) {
+	protected void log(String format, Object... params) {
 		if(loggingEnabled) {
 			Log.v(getClass().getSimpleName(), String.format(format, params));
 		}
@@ -253,7 +242,6 @@ public class RemoteImageView extends LinearLayout {
 		protected Bitmap doInBackground(ImageInfo... params) {
 			ImageInfo info = params[0];
 			String url = info.getUrl();
-			log(url);
 			
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
 			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");				
@@ -263,9 +251,7 @@ public class RemoteImageView extends LinearLayout {
 			{
 				// Save locally to SD
 				if(cacheToFile) {
-					boolean saved = imageCacheHelper.saveImage(bitmap, info);
-					log("File saved: %b, %s", saved, info);
-					log("cache dir: %s", imageCacheHelper.getCacheDirectory().getAbsolutePath());
+					imageCacheHelper.saveImage(bitmap, info);
 				}
 				hasImage = true;
 			}
