@@ -123,7 +123,6 @@ public class RemoteImageView extends LinearLayout {
 				bitmapDrawable = null;
 			}
 		}
-			
 		imageInfo = info;
 	}
 	
@@ -220,9 +219,11 @@ public class RemoteImageView extends LinearLayout {
 		protected void onPostExecute(Bitmap bitmap) {
 			if(bitmap != null)
 			{
-				hasImage = true;
-				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-				imageView.setImageDrawable(bitmapDrawable);
+				if (info != null && info.equals(imageInfo)) {
+					hasImage = true;
+					bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+					imageView.setImageDrawable(bitmapDrawable);
+				}
 			}
 			else
 			{
@@ -237,10 +238,12 @@ public class RemoteImageView extends LinearLayout {
 	}
 	
 	private class RemoteLoadTask extends AsyncTask<ImageInfo, Void, Bitmap> {
+		
+		ImageInfo info = null;
 
 		@Override
 		protected Bitmap doInBackground(ImageInfo... params) {
-			ImageInfo info = params[0];
+			info = params[0];
 			String url = info.getUrl();
 			
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
@@ -261,8 +264,10 @@ public class RemoteImageView extends LinearLayout {
 		@Override
 		protected void onPostExecute(final Bitmap bitmap) {
 			if (bitmap != null) {
-				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-				imageView.setImageDrawable(bitmapDrawable);
+				if (info != null && info.equals(imageInfo)) {
+					bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+					imageView.setImageDrawable(bitmapDrawable);
+				}
 			}
 		}
 		
