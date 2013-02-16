@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.util.Log;
@@ -121,7 +123,7 @@ public class ImageCacheHelper {
 		if (memCache != null) {
 			bitmap = memCache.get(info.toString());
 			if (bitmap != null) {
-				log("memory cache hit for " + info.toString());
+				log("memCache hit. size:%d eviction:%d, hit:%d, miss:%d", memCache.size(), memCache.evictionCount(), memCache.hitCount(), memCache.missCount());
 				return bitmap;
 			}
 		}
@@ -156,6 +158,12 @@ public class ImageCacheHelper {
 				}
 			}
 		}
+		flushMemoryCache();
+	}
+	
+	public void flushMemoryCache() {
+		if (memCache != null)
+			memCache.evictAll();
 	}
 	
 	public File getCacheDirectory() { return cacheDirectory; }
@@ -164,6 +172,15 @@ public class ImageCacheHelper {
 
 		public MemCache(int maxSizeBytes) {
 			super(maxSizeBytes);
+		}
+		
+		@SuppressLint("NewApi")
+		@Override
+		protected int sizeOf(String key, Bitmap value) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+				return value.getByteCount();
+			}
+			return super.sizeOf(key, value);
 		}
 	}
 	

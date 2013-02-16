@@ -3,7 +3,6 @@ package us.beacondigital.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
@@ -104,11 +103,15 @@ public class RemoteImageView extends LinearLayout {
 		addView(imageView);
 	}
 	
-	@SuppressWarnings("deprecation")
-	public void setImageBackground(Drawable background) {
-		if(imageView != null && background != null) {
-			// The following method isn't deprecated until Jelly Bean
-			imageView.setBackgroundDrawable(background);
+	public void setBackgroundResource(int resid) {
+		if (imageView != null) {
+			imageView.setBackgroundResource(resid);
+		}
+	}
+	
+	public void setBackgroundColor(int color) {
+		if (imageView != null) {
+			imageView.setBackgroundColor(color);
 		}
 	}
 	
@@ -247,9 +250,16 @@ public class RemoteImageView extends LinearLayout {
 			String url = info.getUrl();
 			
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");				
-			Bitmap bitmap = HttpHelper.getImage(url, client);
-			client.close();
+			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+			Bitmap bitmap = null;
+			
+			try {
+				bitmap = HttpHelper.getImage(url, client);
+			}
+			finally {
+				client.close();
+			}
+			
 			if(bitmap != null)
 			{
 				// Save locally to SD

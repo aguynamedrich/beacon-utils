@@ -41,7 +41,15 @@ public class ImageInfo {
 		private UniqueIdType idType = UniqueIdType.LongInt;
 		private String imageDescription;
 		
-		public static ImageDescriptor create(String imageDescription, long id) {
+		/**
+		 * Creates a description of the image to be saved from a numeric id and one or more
+		 * pieces of text information to uniquely identify the type of object being represented
+		 * 
+		 * @param id
+		 * @param imageDescription
+		 * @return
+		 */
+		public static ImageDescriptor create(long id, String... imageDescription) {
 			ImageDescriptor descriptor = new ImageDescriptor();
 			descriptor.idType = UniqueIdType.LongInt;
 			descriptor.numericId = id;
@@ -49,7 +57,14 @@ public class ImageInfo {
 			return descriptor;
 		}
 
-		public static ImageDescriptor create(String imageDescription, String id) {
+		/**		 * 
+		 * Creates a description of the image to be saved from a text id and one or more
+		 * pieces of text information to uniquely identify the type of object being represented
+		 * @param id
+		 * @param imageDescription
+		 * @return
+		 */
+		public static ImageDescriptor create(String id, String... imageDescription) {
 			ImageDescriptor descriptor = new ImageDescriptor();
 			descriptor.idType = UniqueIdType.String;
 			descriptor.textId = id;
@@ -68,19 +83,24 @@ public class ImageInfo {
 			ImageDescriptor descriptor = new ImageDescriptor();
 			descriptor.idType = UniqueIdType.LongInt;
 			descriptor.numericId = DefaultNumericId;
-			descriptor.imageDescription = fixDescription(imageDescription);
+			descriptor.imageDescription = fixDescription(new String[] { imageDescription });
 			return descriptor;
 		}
 		
 		/**
 		 * Replace whitespace in image description with underscore for safer filename creation
-		 * @param imageDescription
+		 * @param descriptions
 		 * @return
 		 */
-		private static String fixDescription(String imageDescription) {
-			if(!StringUtils.isNullOrEmpty(imageDescription))
-				imageDescription.replaceAll("\\s+", "_");
-			return imageDescription;
+		private static String fixDescription(String[] descriptions) {
+			
+			StringBuilder sb = new StringBuilder();
+			for (String description : descriptions) {
+				if (sb.length() > 0)
+					sb.append("_");
+				sb.append(description.replaceAll("\\s+", "_"));
+			}
+			return sb.toString();
 		}
 
 		public boolean isValid() {
