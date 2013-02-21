@@ -193,7 +193,9 @@ public class ImageCacheHelper {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
 				return value.getByteCount();
 			}
-			return super.sizeOf(key, value);
+			else {
+				return value.getRowBytes() * value.getHeight();
+			}
 		}
 	}
 	
