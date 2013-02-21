@@ -57,7 +57,14 @@ public class RemoteImageView extends LinearLayout {
 		public int getWidth() { return width; }
 		public int getHeight() { return height; }
 	}
+	
+	public enum ResizeAnchor {
+		Width,
+		Height
+	}
+	
 	private AspectRatio aspectRatio = AspectRatio.Default;
+	private ResizeAnchor resizeAnchor = ResizeAnchor.Width;
 
 	public RemoteImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -72,9 +79,15 @@ public class RemoteImageView extends LinearLayout {
 			
 			public boolean onPreDraw() {
 				if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
-					int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
 					ViewGroup.LayoutParams lp = imageView.getLayoutParams();
-					lp.height = height;
+					if (resizeAnchor == ResizeAnchor.Width) {
+						int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
+						lp.height = height;
+					}
+					else {
+						int width = imageView.getHeight() * aspectRatio.getWidth() / aspectRatio.getHeight();
+						lp.width = width;
+					}
 					imageView.setLayoutParams(lp);
 				}
 				getViewTreeObserver().removeOnPreDrawListener(this);
@@ -187,9 +200,35 @@ public class RemoteImageView extends LinearLayout {
 			if (diskLoadTask != null && !diskLoadTask.isCancelled()) {
 				diskLoadTask.cancel(true);
 			}
-			diskLoadTask = new DiskLoadTask();
-			diskLoadTask.execute(imageInfo);
+
+			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+			Bitmap bitmap = imageCacheHelper.loadFromCache(imageInfo);
 			
+			if (bitmap != null) {
+				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+				imageView.setImageDrawable(bitmapDrawable);
+			}
+			else {
+				diskLoadTask = new DiskLoadTask();
+				diskLoadTask.execute(imageInfo);
+			}
+		}
+	}
+	
+	/**
+	 * Exposes the ability to cancel the operation.
+	 * A good example usage of this is when an image is requested and the enclosing
+	 * Activity or Fragment is destroyed before the operation is finished
+	 */
+	public void cancel() {
+		log("calling cancel");
+		if (remoteLoadTask != null && !remoteLoadTask.isCancelled()) {
+			log("cancelling remoteLoadTask");
+			remoteLoadTask.cancel(true);
+		}
+		if (diskLoadTask != null && !diskLoadTask.isCancelled()) {
+			log("cancelling diskLoadTask");
+			diskLoadTask.cancel(true);
 		}
 	}
 	
@@ -253,7 +292,7 @@ public class RemoteImageView extends LinearLayout {
 			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 			Bitmap bitmap = null;
 			
-			try {
+			try {			
 				bitmap = HttpHelper.getImage(url, client);
 			}
 			finally {
@@ -268,6 +307,7 @@ public class RemoteImageView extends LinearLayout {
 				}
 				hasImage = true;
 			}
+			
 			return bitmap;
 		}
 		

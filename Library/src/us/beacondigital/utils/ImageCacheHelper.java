@@ -115,6 +115,19 @@ public class ImageCacheHelper {
 		return success;
 	}
 	
+	/**
+	 * Go straight to cache, returns null if it doesn't exist
+	 * @param info
+	 * @return
+	 */
+	public Bitmap loadFromCache(ImageInfo info) {
+		Bitmap bitmap = null;
+		if (memCache != null) {
+			bitmap = memCache.get(info.toString());
+		}
+		return bitmap;
+	}
+	
 	public Bitmap loadImage(ImageInfo info) {
 		
 		FileInputStream fis = null;
