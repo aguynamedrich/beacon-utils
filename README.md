@@ -100,11 +100,13 @@ ImageDescriptor descriptor = ImageDescriptor.create(user.id, "User", user.name);
 ImageInfo imageInfo = new ImageInfo(descriptor, user.getThumbnailUrl());
 userThumbnail.setImageInfo(imageInfo);
 userThumbnail.setCacheToFile(false);
+userThumbnail.setScaleType(ScaleType.CENTER_CROP);
 userThumbnail.request();
 
 descriptor = ImageDescriptor.create(project.id, "Project", project.title);
 imageInfo = new ImageInfo(descriptor, project.getImageUrl());
 projectImage.setImageInfo(imageInfo);
+projectImage.setScaleType(ScaleType.FIT_CENTER);
 projectImage.request();
 ```
 
