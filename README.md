@@ -188,4 +188,11 @@ HttpUtils.isOK(response);
 
 // To determine if the status code of an HttpResponse is in the 400 range...
 HttpUtils.isUnauthorized(response);
+
+// Other string helpers
+boolean isEmail = StringUtils.isValidEmail(data);
+boolean isUrl = StringUtils.isValidUrl(data);
+boolean isNumeric = StringUtils.isNumeric(data);
+boolean isPositiveInteger = StringUtils.isPositiveInteger(data);
+String ellipsized = StringUtils.ellipsize(longString, maxLength);
 ```
