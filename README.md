@@ -108,6 +108,26 @@ projectImage.setImageInfo(imageInfo);
 projectImage.request();
 ```
 
+You can also add a GestureDetector to the RemoteImageView to process touch events and gestures.  Here is an example of adding a double tap gesture listener to a RemoteImageView within a fragment (notice that the GestureDetector constructor requires an activity context reference.  From within your Activity, you can pass "this").
+
+```java
+image.setGestureDetector(new GestureDetector(getActivity(), new DoubleTapListener()));
+
+private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+	
+	@Override
+	public boolean onDown(MotionEvent e) {
+		return true;
+	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e) {
+		// Process double tap here...
+		return true;
+	}
+}
+```
+
 ## HttpHelper
 
 HttpHelper contains a collection of convenience methods for quickly and easily retrieving data from the web.  Currently, most HTTP verbs are supported and there are overloaded methods for getting a String, Bitmap, HttpResponse or just the headers from a resource on the web.
