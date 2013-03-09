@@ -7,6 +7,8 @@ import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
@@ -35,7 +37,7 @@ public class RemoteImageView extends LinearLayout {
 	DiskLoadTask diskLoadTask = null;
 	RemoteLoadTask remoteLoadTask = null;
 	
-//	private final Handler handler = new Handler();
+	GestureDetector gestureDetector = null;
 	
 	/**
 	 * Allows the consumer to declare a desired aspect ratio
@@ -126,6 +128,18 @@ public class RemoteImageView extends LinearLayout {
 		if (imageView != null) {
 			imageView.setBackgroundColor(color);
 		}
+	}
+	
+	public void setGestureDetector(GestureDetector gestureDetector) {
+		this.gestureDetector = gestureDetector;
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (gestureDetector != null)
+			return gestureDetector.onTouchEvent(event);
+		else
+			return super.onTouchEvent(event);
 	}
 	
 	public void setImageInfo(ImageInfo info)
