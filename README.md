@@ -76,11 +76,15 @@ app.customMethod();
 RemoteImageView allows you to easily load images from web url's without having to do the extra work of downloading and caching the files.  There are several classes that compliment RemoteImageView that make it easy to set up your caching layer and describing the images to avoid having name clashes of your files in cache.
 
 ### Initial setup for cache and logging preferences
-These settings allow you to control where the downloaded files are cached as well as to turn logging on and off.  I typically run this setup once in the Application class on first launch (onCreate).
+These settings allow you to control where the downloaded files are cached as well as to turn logging on and off.  I typically run this setup once in the Application class on first launch (onCreate).  The init method takes an optional float to turn on in-memory caching.  This will speed up the loading time of your images and is particularly useful for thumbnails in a ListView or GridView when scrolling.  The parameter used calculates how much memory to use for the cache as a percentage of the estimated memory space for your app as determined by the ActivityManager.  In the example below, 15% of the total memory space will be used for caching remote images.
 ```java
+    	
+// Use 15% of estimated application memory space for remote image memory cache
+float lruCacheSize = 0.15f;
 ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-imageCacheHelper.init(ImageCacheDir, ImageCacheSubDir);
+imageCacheHelper.init(ImageCacheDir, ImageCacheSubDir, lruCacheSize);
 imageCacheHelper.setStorageLocation(StorageLocation.ApplicationCache);
+imageCacheHelper.flushCache();
 RemoteImageView.setLoggingEnabled(true);
 ```
 ### Resolve RemoteImageView items in your Activity, initialize your ImageInfo objects, and trigger async download and UI refresh
@@ -89,12 +93,16 @@ The ImageInfo and ImageDescriptor classes are used to build a unique cache key t
 myFirstImage = (RemoteImageView) findViewById(R.id.myFirstImage);
 mySecondImage = (RemoteImageView) findViewById(R.id.mySecondImage);
 
-ImageInfo firstImageInfo = new ImageInfo(ImageDescriptor.create(dataObj1.getTitle()), dataObj1.getUrl());
+// The 'user' and 'project' objects used in the example are assumed to be some model object that the image view will be associated to.
+
+ImageDescriptor descriptor1 = ImageDescriptor.create(user.id, "User", user.name);
+ImageInfo firstImageInfo = new ImageInfo(descriptor1, userProfile.getThumbnailUrl());
 myFirstImage.setImageInfo(firstImageInfo);
 myFirstImage.setCacheToFile(false);
 myFirstImage.request();
 
-ImageInfo secondImageInfo = new ImageInfo(ImageDescriptor.create(dataObj2.getTitle()), dataObj2.getUrl());
+ImageDescriptor descriptor2 = ImageDescriptor.create(project.id, "Project", project.title);
+ImageInfo secondImageInfo = new ImageInfo(descriptor2, project.getImageUrl());
 mySecondImage.setImageInfo(secondImageInfo);
 mySecondImage.request();
 ```
