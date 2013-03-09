@@ -93,10 +93,11 @@ The ImageInfo and ImageDescriptor classes are used to build a unique cache key t
 myFirstImage = (RemoteImageView) findViewById(R.id.myFirstImage);
 mySecondImage = (RemoteImageView) findViewById(R.id.mySecondImage);
 
-// The 'user' and 'project' objects used in the example are assumed to be some model object that the image view will be associated to.
+// The 'user' and 'project' objects used in the example are assumed to be
+// some model objects that the RemoteImageView will be associated to.
 
 ImageDescriptor descriptor1 = ImageDescriptor.create(user.id, "User", user.name);
-ImageInfo firstImageInfo = new ImageInfo(descriptor1, userProfile.getThumbnailUrl());
+ImageInfo firstImageInfo = new ImageInfo(descriptor1, user.getThumbnailUrl());
 myFirstImage.setImageInfo(firstImageInfo);
 myFirstImage.setCacheToFile(false);
 myFirstImage.request();
