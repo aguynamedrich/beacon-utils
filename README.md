@@ -90,22 +90,22 @@ RemoteImageView.setLoggingEnabled(true);
 ### Resolve RemoteImageView items in your Activity, initialize your ImageInfo objects, and trigger async download and UI refresh
 The ImageInfo and ImageDescriptor classes are used to build a unique cache key to avoid name clashes.  You can also bypass caching images to file so you can control which images are refreshed on every request.
 ```java		
-myFirstImage = (RemoteImageView) findViewById(R.id.myFirstImage);
-mySecondImage = (RemoteImageView) findViewById(R.id.mySecondImage);
+userThumbnail = (RemoteImageView) findViewById(R.id.userThumbnail);
+projectImage = (RemoteImageView) findViewById(R.id.projectImage);
 
 // The 'user' and 'project' objects used in the example are assumed to be
 // some model objects that the RemoteImageView will be associated to.
 
-ImageDescriptor descriptor1 = ImageDescriptor.create(user.id, "User", user.name);
-ImageInfo firstImageInfo = new ImageInfo(descriptor1, user.getThumbnailUrl());
-myFirstImage.setImageInfo(firstImageInfo);
-myFirstImage.setCacheToFile(false);
-myFirstImage.request();
+ImageDescriptor userDescriptor = ImageDescriptor.create(user.id, "User", user.name);
+ImageInfo firstImageInfo = new ImageInfo(userDescriptor, user.getThumbnailUrl());
+userThumbnail.setImageInfo(firstImageInfo);
+userThumbnail.setCacheToFile(false);
+userThumbnail.request();
 
-ImageDescriptor descriptor2 = ImageDescriptor.create(project.id, "Project", project.title);
-ImageInfo secondImageInfo = new ImageInfo(descriptor2, project.getImageUrl());
-mySecondImage.setImageInfo(secondImageInfo);
-mySecondImage.request();
+ImageDescriptor projectDescriptor = ImageDescriptor.create(project.id, "Project", project.title);
+ImageInfo secondImageInfo = new ImageInfo(projectDescriptor, project.getImageUrl());
+projectImage.setImageInfo(secondImageInfo);
+projectImage.request();
 ```
 
 ## HttpHelper
