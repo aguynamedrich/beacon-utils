@@ -96,15 +96,15 @@ projectImage = (RemoteImageView) findViewById(R.id.projectImage);
 // The 'user' and 'project' objects used in the example are assumed to be
 // some model objects that the RemoteImageView will be associated to.
 
-ImageDescriptor userDescriptor = ImageDescriptor.create(user.id, "User", user.name);
-ImageInfo firstImageInfo = new ImageInfo(userDescriptor, user.getThumbnailUrl());
-userThumbnail.setImageInfo(firstImageInfo);
+ImageDescriptor descriptor = ImageDescriptor.create(user.id, "User", user.name);
+ImageInfo imageInfo = new ImageInfo(descriptor, user.getThumbnailUrl());
+userThumbnail.setImageInfo(imageInfo);
 userThumbnail.setCacheToFile(false);
 userThumbnail.request();
 
-ImageDescriptor projectDescriptor = ImageDescriptor.create(project.id, "Project", project.title);
-ImageInfo secondImageInfo = new ImageInfo(projectDescriptor, project.getImageUrl());
-projectImage.setImageInfo(secondImageInfo);
+descriptor = ImageDescriptor.create(project.id, "Project", project.title);
+imageInfo = new ImageInfo(descriptor, project.getImageUrl());
+projectImage.setImageInfo(imageInfo);
 projectImage.request();
 ```
 
