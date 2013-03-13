@@ -5,17 +5,22 @@ import java.net.URI;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.graphics.Bitmap;
@@ -70,6 +75,17 @@ public class HttpHelper
 		return image;
 	}
 	
+	public static Header getBasicAuthHeader(String user, String password, HttpRequest request) {
+		Header authorizationHeader = null;
+		try {
+			UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user, password);
+			BasicScheme scheme = new BasicScheme();
+			authorizationHeader = scheme.authenticate(credentials, request);
+		}
+		catch (AuthenticationException e) { }
+		return authorizationHeader;
+	}
+	
 	/**
 	 * Simplest possible way to read a string from a url using a single-use DefaultHttpClient
 	 * @param url
@@ -118,18 +134,8 @@ public class HttpHelper
 		HttpResponse response = null;
 		try
 		{
-			HttpGet request = new HttpGet();
-			request.setURI(new URI(url));
-			
-			if(authUser != null && authPass != null)
-			{
-				UsernamePasswordCredentials credentials =
-					new UsernamePasswordCredentials(authUser, authPass);
-			    BasicScheme scheme = new BasicScheme();
-			    Header authorizationHeader = scheme.authenticate(credentials, request);
-			    request.addHeader(authorizationHeader);
-			}
-		    
+			HttpGet request = new HttpGet(url);
+			addBasicAuthHeader(request, authUser, authPass);
 		    response = client.execute(request);
 		}
 		catch(Exception ex) { }
@@ -249,16 +255,8 @@ public class HttpHelper
 		try
 		{
 			HttpHead request = new HttpHead(url);
+			addBasicAuthHeader(request, authUser, authPass);
 		    response = client.execute(request);
-			
-			if(authUser != null && authPass != null)
-			{
-				UsernamePasswordCredentials credentials =
-					new UsernamePasswordCredentials(authUser, authPass);
-			    BasicScheme scheme = new BasicScheme();
-			    Header authorizationHeader = scheme.authenticate(credentials, request);
-			    request.addHeader(authorizationHeader);
-			}
 		}
 		catch(Exception ex) { }
 		return response;
@@ -300,5 +298,25 @@ public class HttpHelper
 		}
 		catch(Exception ex) { }
 		return response;
+	}
+	
+	public static String getCookieValue(AbstractHttpClient client, String name) {
+		String value = null;
+		CookieStore cookieStore = client.getCookieStore();
+		List<Cookie> cookies = cookieStore.getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equalsIgnoreCase(name)) {
+				value = cookie.getValue();
+			}
+		}
+		return value;
+	}
+	
+	public static void addBasicAuthHeader(HttpRequest request, String user, String pass) {
+		if (!StringUtils.isNullOrEmpty(user) && !StringUtils.isNullOrEmpty(pass)) {
+			Header authHeader = getBasicAuthHeader(user, pass, request);
+			if (authHeader != null)
+				request.addHeader(authHeader);
+		}
 	}
 }
