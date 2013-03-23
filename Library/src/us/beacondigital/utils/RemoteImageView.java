@@ -80,22 +80,26 @@ public class RemoteImageView extends LinearLayout {
 		obs.addOnPreDrawListener(new OnPreDrawListener() {
 			
 			public boolean onPreDraw() {
-				if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
-					ViewGroup.LayoutParams lp = imageView.getLayoutParams();
-					if (resizeAnchor == ResizeAnchor.Width) {
-						int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
-						lp.height = height;
-					}
-					else {
-						int width = imageView.getHeight() * aspectRatio.getWidth() / aspectRatio.getHeight();
-						lp.width = width;
-					}
-					imageView.setLayoutParams(lp);
-				}
+				applyAspectRatio();
 				getViewTreeObserver().removeOnPreDrawListener(this);
 				return true;
 			}
 		});
+	}
+
+	protected void applyAspectRatio() {
+		if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
+			ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+			if (resizeAnchor == ResizeAnchor.Width) {
+				int height = imageView.getWidth() * aspectRatio.getHeight() / aspectRatio.getWidth();
+				lp.height = height;
+			}
+			else {
+				int width = imageView.getHeight() * aspectRatio.getWidth() / aspectRatio.getHeight();
+				lp.width = width;
+			}
+			imageView.setLayoutParams(lp);
+		}
 	}
 
 	public void setAspectRatio(AspectRatio aspectRatio) {
@@ -188,9 +192,7 @@ public class RemoteImageView extends LinearLayout {
 		if(bmp != null)
 		{
 			hasImage = true;
-			bitmapDrawable = new BitmapDrawable(context.getResources(), bmp);
-			imageView.setImageDrawable(bitmapDrawable);
-			setBackgroundResource(0);
+			refresh(bmp);
 		}
 	}
 
@@ -219,8 +221,7 @@ public class RemoteImageView extends LinearLayout {
 			Bitmap bitmap = imageCacheHelper.loadFromCache(imageInfo);
 			
 			if (bitmap != null) {
-				bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-				imageView.setImageDrawable(bitmapDrawable);
+				refresh(bitmap);
 			}
 			else {
 				diskLoadTask = new DiskLoadTask();
@@ -277,8 +278,7 @@ public class RemoteImageView extends LinearLayout {
 			{
 				if (info != null && info.equals(imageInfo)) {
 					hasImage = true;
-					bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-					imageView.setImageDrawable(bitmapDrawable);
+					refresh(bitmap);
 				}
 			}
 			else
@@ -329,12 +329,18 @@ public class RemoteImageView extends LinearLayout {
 		protected void onPostExecute(final Bitmap bitmap) {
 			if (bitmap != null) {
 				if (info != null && info.equals(imageInfo)) {
-					bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-					imageView.setImageDrawable(bitmapDrawable);
+					refresh(bitmap);
 				}
 			}
 		}
 		
+	}
+
+	public void refresh(Bitmap bitmap) {
+		setBackgroundResource(0);
+		bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+		imageView.setImageDrawable(bitmapDrawable);
+		applyAspectRatio();
 	}
 
 }
