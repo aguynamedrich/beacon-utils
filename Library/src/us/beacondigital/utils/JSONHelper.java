@@ -61,7 +61,8 @@ public class JSONHelper {
 		String val = defaultValue;
 		try
 		{
-			val = obj.getString(name);
+			if (!obj.isNull(name))
+				val = obj.getString(name);
 		}
 		catch (JSONException e) { }
 		catch (NullPointerException e) { }

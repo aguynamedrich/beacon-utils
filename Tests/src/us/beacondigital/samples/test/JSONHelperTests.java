@@ -38,5 +38,22 @@ public class JSONHelperTests extends AndroidTestCase {
 		assertNotNull("Resulting object should not be null when queried from outer object containing a JSONObject with our key", result);
 		assertTrue("Resulting object should be of type JSONObject when queried properly from JSONHelper", result.getClass().equals(JSONObject.class));
 	}
+	
+	/**
+	 * This test is to make sure that the getString method takes into account
+	 * null values.  By default { "key": null } will parse to the string "null"
+	 * when using JSONObject.getString by itself.  To get around that, we test 
+	 * JSONObject.isNull(key) before attempting to retrieve
+	 * @throws JSONException 
+	 */
+	public void testNullValueForStringField() throws JSONException {
+		String jsonWithNull = "{ key: null }";
+		String jsonWithValue = "{ key: \"some value\" }";
+		JSONObject objWithNull = new JSONObject(jsonWithNull);
+		JSONObject objWithValue = new JSONObject(jsonWithValue);
+		
+		assertNull(JSONHelper.getString(objWithNull, "key"));
+		assertNotNull(JSONHelper.getString(objWithValue, "key"));
+	}
 
 }
