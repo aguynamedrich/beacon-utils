@@ -1,9 +1,15 @@
 package us.beacondigital.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -303,14 +309,20 @@ public class RemoteImageView extends LinearLayout {
 			String url = info.getUrl();
 			
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-			AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+			DefaultHttpClient client = HttpClientProvider.get();
+			InputStream stream = null;
 			Bitmap bitmap = null;
 			
-			try {			
-				bitmap = HttpHelper.getImage(url, client);
+			try {
+				HttpResponse response = WebRequest.execute(client, url);
+				stream = response.getEntity().getContent();
+				bitmap = BitmapFactory.decodeStream(stream);
 			}
+			catch (IllegalStateException e) { }
+			catch (IOException e) { }
 			finally {
-				client.close();
+				IOUtils.safeClose(stream);
+				IOUtils.safeClose(client);
 			}
 			
 			if(bitmap != null)

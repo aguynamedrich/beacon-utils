@@ -34,6 +34,7 @@ import android.net.http.AndroidHttpClient;
  * @author Rich Stern
  *
  */
+@Deprecated
 public class HttpHelper
 {	
 	public final static String HeaderLastModified = "Last-Modified";
@@ -307,6 +308,18 @@ public class HttpHelper
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equalsIgnoreCase(name)) {
 				value = cookie.getValue();
+			}
+		}
+		return value;
+	}
+	
+	public static Cookie getCookie(AbstractHttpClient client, String name) {
+		Cookie value = null;
+		CookieStore cookieStore = client.getCookieStore();
+		List<Cookie> cookies = cookieStore.getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equalsIgnoreCase(name)) {
+				value = cookie;
 			}
 		}
 		return value;
