@@ -92,8 +92,19 @@ public class RemoteImageView extends LinearLayout {
 			}
 		});
 	}
+	
+	/**
+	 * Cancel any pending tasks when view is detached
+	 */
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+		log("onDetachedFromWindow");
+		cancel();
+		
+	}
 
-	protected void applyAspectRatio() {
+	public synchronized void applyAspectRatio() {
 		if (aspectRatio != AspectRatio.Default && imageView.getWidth() > 0) {
 			ViewGroup.LayoutParams lp = imageView.getLayoutParams();
 			if (resizeAnchor == ResizeAnchor.Width) {
