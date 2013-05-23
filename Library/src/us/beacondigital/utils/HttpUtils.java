@@ -1,5 +1,8 @@
 package us.beacondigital.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 import org.apache.http.HttpResponse;
 
 /**
@@ -8,6 +11,35 @@ import org.apache.http.HttpResponse;
  *
  */
 public class HttpUtils {
+	
+	/**
+	 * Utility method for reading a byte array from an InputStream object
+	 * @param response InputStream object retrieved from an HttpResponse
+	 * @return String contents of stream
+	 */
+	public static byte[] readBytes(HttpResponse response)
+	{
+		byte[] bytes = null;
+		InputStream is = null;
+		ByteArrayOutputStream buffer = null;
+		try {
+			is = response.getEntity().getContent();
+			buffer = new ByteArrayOutputStream();
+
+			int bytesRead;
+			byte[] data = new byte[1024 * 16];
+			while ((bytesRead = is.read(data, 0, data.length)) != -1) {
+				  buffer.write(data, 0, bytesRead);
+			}
+			bytes = buffer.toByteArray();
+		}
+		catch (Exception ex) { }
+		finally {
+			IOUtils.safeClose(is);
+			IOUtils.safeClose(buffer);
+		}
+		return bytes;
+	}
 
 	public static boolean isOK(HttpResponse response) {
 		return

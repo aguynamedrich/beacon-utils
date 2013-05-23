@@ -250,4 +250,56 @@ public class WebRequest {
 		IOUtils.safeClose(client);
 		return data;
 	}
+	
+	/**	 * 
+	 * This method returns only the String contents of a web request.  Use 
+	 * {@link #execute(AbstractHttpClient, String) execute}
+	 * if you need more, such as the {@link StatusLine} or {@link CookieStore}
+	 * @param url
+	 * @return
+	 */
+	public static byte[] readBytes(String url) {
+		return readBytes(url, Verb.GET, null, null, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Cookie... cookies) {
+		return readBytes(url, Verb.GET, cookies, null, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Verb verb, Cookie... cookies) {
+		return readBytes(url, verb, cookies, null, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, NameValuePair... params) {
+		return readBytes(url, Verb.GET, null, params, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Verb verb, NameValuePair... params) {
+		return readBytes(url, verb, null, params, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, NameValuePair[] params) {
+		return readBytes(url, verb, cookies, params, AuthType.Basic, null, null);
+	}
+	
+	/**
+	 * This method returns only the String contents of a web request.  Use 
+	 * {@link #execute(AbstractHttpClient, String, Verb, Cookie[], NameValuePair[], AuthType, String, String) execute}
+	 * if you need more, such as the {@link StatusLine} or {@link CookieStore}
+	 * @param url
+	 * @param verb
+	 * @param cookies
+	 * @param params
+	 * @param authType
+	 * @param basicAuthUser
+	 * @param basicAuthPass
+	 * @return
+	 */
+	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+		DefaultHttpClient client = HttpClientProvider.get();
+		HttpResponse response = execute(client, url, verb, cookies, params, authType, basicAuthUser, basicAuthPass);
+		byte[] data = HttpUtils.readBytes(response);
+		IOUtils.safeClose(client);
+		return data;
+	}
 }
