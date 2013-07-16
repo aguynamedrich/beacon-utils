@@ -1,17 +1,20 @@
 package us.beacondigital.utils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
 
+import android.content.res.AssetManager;
+
 public class StringUtils {
 	
-	private final static String EmailRegex = "^[_a-z0-9-+]+(\\.[_a-z0-9-+]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,8})$";
-	private final static String URLRegex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-	private final static String AllDigitsRegex = "^\\d+$";
-	private final static String NumericRegex = "^-?\\d*(\\.\\d+)?$";
+	public final static String EmailRegex = "^[_a-z0-9-+]+(\\.[_a-z0-9-+]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,8})$";
+	public final static String URLRegex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+	public final static String AllDigitsRegex = "^\\d+$";
+	public final static String NumericRegex = "^-?\\d*(\\.\\d+)?$";
 	
 	/**
 	 * Utility method for pulling plain text from an InputStream object
@@ -39,6 +42,27 @@ public class StringUtils {
 		return sb.toString();
 	}
 	
+	/**
+	 * Read the string contents of a file in the application's assets directory
+	 * @param fileName
+	 * @return
+	 */
+	public static String readAsset(String fileName) {
+		AssetManager am = ServiceLocator.getAppContext().getAssets();
+		String contents = null;
+		InputStream in = null;
+		try {
+			in = am.open(fileName);
+			contents = readStream(in);
+		}
+		catch (IOException e) { }
+		finally
+		{
+			IOUtils.safeClose(in);
+		}
+		return contents;
+	}
+
 	/**
 	 * Tests an input string against the null value or trimmed length greater than zero
 	 * @param input

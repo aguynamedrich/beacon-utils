@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -20,6 +22,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
@@ -63,29 +66,45 @@ public class WebRequest {
 	 * @return
 	 */
 	public static HttpResponse execute(AbstractHttpClient client, String url) {
-		return execute(client, url, Verb.GET, null, null, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, null, null, null, AuthType.Basic, null, null);
 	}
-	
+
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb) {
+		return execute(client, url, verb, null, null, null, AuthType.Basic, null, null);
+	}
+
 	public static HttpResponse execute(AbstractHttpClient client, String url, Cookie... cookies) {
-		return execute(client, url, Verb.GET, cookies, null, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, cookies, null, null, AuthType.Basic, null, null);
 	}
-	
+
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie... cookies) {
-		return execute(client, url, verb, cookies, null, AuthType.Basic, null, null);
+		return execute(client, url, verb, cookies, null, null, AuthType.Basic, null, null);
 	}
-	
+
 	public static HttpResponse execute(AbstractHttpClient client, String url, NameValuePair... params) {
-		return execute(client, url, Verb.GET, null, params, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, null, null, params, AuthType.Basic, null, null);
 	}
-	
+
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, NameValuePair... params) {
-		return execute(client, url, verb, null, params, AuthType.Basic, null, null);
+		return execute(client, url, verb, null, null, params, AuthType.Basic, null, null);
 	}
-	
+
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params) {
-		return execute(client, url, verb, cookies, params, AuthType.Basic, null, null);
+		return execute(client, url, verb, cookies, null, params, AuthType.Basic, null, null);
 	}
-	
+
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity) {
+		return execute(client, url, verb, cookies, entity, null, AuthType.Basic, null, null);
+	}
+
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, HttpEntity entity) {
+		return execute(client, url, verb, null, entity, null, AuthType.Basic, null, null);
+	}
+
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+		return execute(client, url, verb, cookies, null, params, authType, basicAuthUser, basicAuthPass);
+	}
+
 	/**
 	 * This method is where the work is done, taking all possible parameters as arguments.
 	 * There are several overloads that are much simpler when not all parameters are necessary
@@ -97,7 +116,7 @@ public class WebRequest {
 	 * @param pass
 	 * @return
 	 */
-	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
 		HttpResponse response = null;
 		
 		// Add cookies
@@ -118,8 +137,21 @@ public class WebRequest {
 			break;
 		case POST:
 			request = new HttpPost(url);
-			addPostParams((HttpPost) request, params);
+			if (entity != null) {
+				((HttpPost) request).setEntity(entity);
+			}
+			else {
+				addPostParams((HttpPost) request, params);
+			}
 			break;
+		case PUT:
+			request = new HttpPut(url);
+			if (entity != null) {
+				((HttpPut) request).setEntity(entity);
+			}
+			else {
+				addPostParams((HttpPut) request, params);
+			}
 		case DELETE:
 			request = new HttpDelete(url);
 			break;
@@ -158,7 +190,7 @@ public class WebRequest {
 	 * @param request
 	 * @param params
 	 */
-	private static void addPostParams(HttpPost post, NameValuePair[] params) {
+	private static void addPostParams(HttpEntityEnclosingRequest post, NameValuePair[] params) {
 		if(params != null && params.length > 0) {
 			try {
 				post.setEntity(new UrlEncodedFormEntity(Arrays.asList(params)));
