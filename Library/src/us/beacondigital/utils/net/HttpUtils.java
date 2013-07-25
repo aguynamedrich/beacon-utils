@@ -1,9 +1,11 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import org.apache.http.HttpResponse;
+
+import us.beacondigital.utils.IOUtils;
 
 /**
  * Shortcuts for determining if an HttpResponse is valid and to determine the range of its status code

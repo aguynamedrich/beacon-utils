@@ -1,10 +1,14 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.image;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import us.beacondigital.utils.IOUtils;
+import us.beacondigital.utils.ServiceLocator;
+import us.beacondigital.utils.StringUtils;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;

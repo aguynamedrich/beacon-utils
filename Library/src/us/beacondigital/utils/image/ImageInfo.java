@@ -1,5 +1,6 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.image;
 
+import us.beacondigital.utils.StringUtils;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap.CompressFormat;
 

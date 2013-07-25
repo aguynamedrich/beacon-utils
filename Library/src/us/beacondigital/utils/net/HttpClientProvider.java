@@ -1,4 +1,4 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.net;
 
 import org.apache.http.HttpVersion;
 import org.apache.http.conn.ClientConnectionManager;

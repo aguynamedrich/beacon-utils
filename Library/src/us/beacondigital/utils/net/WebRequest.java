@@ -1,4 +1,4 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.net;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -33,6 +33,9 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import us.beacondigital.utils.IOUtils;
+import us.beacondigital.utils.StringUtils;
+
 /**
  * Utility for making simple requests to a web uri.
  * There are several overloads of the {@link #read(String) read} method 
@@ -44,9 +47,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *
  */
 public class WebRequest {
-	
+
 	private static final String ENCODING_UTF8 = "utf-8";
 	
+	public final static String HEADER_LAST_MODIFIED = "Last-Modified";
+	public final static String HEADER_CONTENT_LENGTH = "Content-Length";
+	public final static String HEADER_CONTENT_TYPE = "Content-Type";
+	public final static String HEADER_ACCEPT = "Accept";
+
+	public final static String CONTENT_TYPE_JSON = "application/json";
+	public final static String CONTENT_TYPE_JPEG = "image/jpeg";
+	public final static String CONTENT_TYPE_MULTIPART_FORM_DATA = "multipart/form-data";
+
 	public enum Verb {
 		GET,
 		POST,
@@ -66,43 +78,51 @@ public class WebRequest {
 	 * @return
 	 */
 	public static HttpResponse execute(AbstractHttpClient client, String url) {
-		return execute(client, url, Verb.GET, null, null, null, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, null, null, null, null, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb) {
-		return execute(client, url, verb, null, null, null, AuthType.Basic, null, null);
+		return execute(client, url, verb, null, null, null, null, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Cookie... cookies) {
-		return execute(client, url, Verb.GET, cookies, null, null, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie... cookies) {
-		return execute(client, url, verb, cookies, null, null, AuthType.Basic, null, null);
+		return execute(client, url, verb, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, NameValuePair... params) {
-		return execute(client, url, Verb.GET, null, null, params, AuthType.Basic, null, null);
+		return execute(client, url, Verb.GET, null, null, null, params, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, NameValuePair... params) {
-		return execute(client, url, verb, null, null, params, AuthType.Basic, null, null);
+		return execute(client, url, verb, null, null, null, params, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params) {
-		return execute(client, url, verb, cookies, null, params, AuthType.Basic, null, null);
+		return execute(client, url, verb, cookies, null, null, params, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity) {
-		return execute(client, url, verb, cookies, entity, null, AuthType.Basic, null, null);
+		return execute(client, url, verb, cookies, entity, null, null, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, HttpEntity entity) {
-		return execute(client, url, verb, null, entity, null, AuthType.Basic, null, null);
+		return execute(client, url, verb, null, entity, null, null, AuthType.Basic, null, null);
+	}
+	
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity, Header[] headers) {
+		return execute(client, url, verb, cookies, entity, headers, null, AuthType.Basic, null, null);
+	}
+	
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params, Header[] headers) {
+		return execute(client, url, verb, cookies, null, headers, params, AuthType.Basic, null, null);
 	}
 
 	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
-		return execute(client, url, verb, cookies, null, params, authType, basicAuthUser, basicAuthPass);
+		return execute(client, url, verb, cookies, null, null, params, authType, basicAuthUser, basicAuthPass);
 	}
 
 	/**
@@ -111,12 +131,15 @@ public class WebRequest {
 	 * @param url
 	 * @param verb
 	 * @param cookies
+	 * @param entity
+	 * @param headers
 	 * @param params
 	 * @param user
 	 * @param pass
 	 * @return
 	 */
-	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+	public static HttpResponse execute(AbstractHttpClient client, String url, Verb verb, Cookie[] cookies, HttpEntity entity,
+			Header[] headers, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
 		HttpResponse response = null;
 		
 		// Add cookies
@@ -165,6 +188,12 @@ public class WebRequest {
 		// Add a auth header if parameters supplied
 		// The method we call will short circuit if parameters are invalid
 		addAuthenticationHeader(request, authType, basicAuthUser, basicAuthPass);
+		
+		// If headers are sent, add them to the request
+		if (headers != null && headers.length > 0) {
+			for (Header header : headers)
+				request.addHeader(header);
+		}
 		
 		try {
 			response = client.execute(request);
@@ -239,27 +268,35 @@ public class WebRequest {
 	 * @return
 	 */
 	public static String read(String url) {
-		return read(url, Verb.GET, null, null, AuthType.Basic, null, null);
+		return read(url, Verb.GET, null, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static String read(String url, Cookie... cookies) {
-		return read(url, Verb.GET, cookies, null, AuthType.Basic, null, null);
+		return read(url, Verb.GET, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static String read(String url, Verb verb, Cookie... cookies) {
-		return read(url, verb, cookies, null, AuthType.Basic, null, null);
+		return read(url, verb, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static String read(String url, NameValuePair... params) {
-		return read(url, Verb.GET, null, params, AuthType.Basic, null, null);
+		return read(url, Verb.GET, null, null, null, params, AuthType.Basic, null, null);
 	}
 	
 	public static String read(String url, Verb verb, NameValuePair... params) {
-		return read(url, verb, null, params, AuthType.Basic, null, null);
+		return read(url, verb, null, null, null, params, AuthType.Basic, null, null);
 	}
 	
 	public static String read(String url, Verb verb, Cookie[] cookies, NameValuePair[] params) {
-		return read(url, verb, cookies, params, AuthType.Basic, null, null);
+		return read(url, verb, cookies, null, null, params, AuthType.Basic, null, null);
+	}
+	
+	public static String read(String url, Verb verb, Cookie[] cookies, HttpEntity entity, Header[] headers) {
+		return read(url, verb, cookies, entity, headers, null, AuthType.Basic, null, null);
+	}
+	
+	public static String read(String url, Verb verb, Cookie[] cookies, NameValuePair[] params, Header[] headers) {
+		return read(url, verb, cookies, null, headers, params, AuthType.Basic, null, null);
 	}
 	
 	/**
@@ -275,9 +312,10 @@ public class WebRequest {
 	 * @param basicAuthPass
 	 * @return
 	 */
-	public static String read(String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+	public static String read(String url, Verb verb, Cookie[] cookies, HttpEntity entity, Header[] headers, NameValuePair[] params,
+			AuthType authType, String basicAuthUser, String basicAuthPass) {
 		DefaultHttpClient client = HttpClientProvider.get();
-		HttpResponse response = execute(client, url, verb, cookies, params, authType, basicAuthUser, basicAuthPass);
+		HttpResponse response = execute(client, url, verb, cookies, entity, headers, params, authType, basicAuthUser, basicAuthPass);
 		String data = StringUtils.readStream(response);
 		IOUtils.safeClose(client);
 		return data;
@@ -291,27 +329,35 @@ public class WebRequest {
 	 * @return
 	 */
 	public static byte[] readBytes(String url) {
-		return readBytes(url, Verb.GET, null, null, AuthType.Basic, null, null);
+		return readBytes(url, Verb.GET, null, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static byte[] readBytes(String url, Cookie... cookies) {
-		return readBytes(url, Verb.GET, cookies, null, AuthType.Basic, null, null);
+		return readBytes(url, Verb.GET, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static byte[] readBytes(String url, Verb verb, Cookie... cookies) {
-		return readBytes(url, verb, cookies, null, AuthType.Basic, null, null);
+		return readBytes(url, verb, cookies, null, null, null, AuthType.Basic, null, null);
 	}
 	
 	public static byte[] readBytes(String url, NameValuePair... params) {
-		return readBytes(url, Verb.GET, null, params, AuthType.Basic, null, null);
+		return readBytes(url, Verb.GET, null, null, null, params, AuthType.Basic, null, null);
 	}
 	
 	public static byte[] readBytes(String url, Verb verb, NameValuePair... params) {
-		return readBytes(url, verb, null, params, AuthType.Basic, null, null);
+		return readBytes(url, verb, null, null, null, params, AuthType.Basic, null, null);
 	}
 	
 	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, NameValuePair[] params) {
-		return readBytes(url, verb, cookies, params, AuthType.Basic, null, null);
+		return readBytes(url, verb, cookies, null, null, params, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, HttpEntity entity, Header[] headers) {
+		return readBytes(url, verb, cookies, entity, headers, null, AuthType.Basic, null, null);
+	}
+	
+	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, NameValuePair[] params, Header[] headers) {
+		return readBytes(url, verb, cookies, null, headers, params, AuthType.Basic, null, null);
 	}
 	
 	/**
@@ -327,9 +373,9 @@ public class WebRequest {
 	 * @param basicAuthPass
 	 * @return
 	 */
-	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
+	public static byte[] readBytes(String url, Verb verb, Cookie[] cookies, HttpEntity entity, Header[] headers, NameValuePair[] params, AuthType authType, String basicAuthUser, String basicAuthPass) {
 		DefaultHttpClient client = HttpClientProvider.get();
-		HttpResponse response = execute(client, url, verb, cookies, params, authType, basicAuthUser, basicAuthPass);
+		HttpResponse response = execute(client, url, verb, cookies, entity, headers, params, authType, basicAuthUser, basicAuthPass);
 		byte[] data = HttpUtils.readBytes(response);
 		IOUtils.safeClose(client);
 		return data;

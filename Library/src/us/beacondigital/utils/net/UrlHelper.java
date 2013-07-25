@@ -1,4 +1,6 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.net;
+
+import us.beacondigital.utils.StringUtils;
 
 public class UrlHelper {
 	

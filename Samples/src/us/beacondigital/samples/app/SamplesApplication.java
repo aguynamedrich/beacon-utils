@@ -1,10 +1,10 @@
 package us.beacondigital.samples.app;
 
 import us.beacondigital.samples.R;
-import us.beacondigital.utils.ImageCacheHelper;
-import us.beacondigital.utils.RemoteImageView;
 import us.beacondigital.utils.ServiceLocator;
-import us.beacondigital.utils.ImageCacheHelper.StorageLocation;
+import us.beacondigital.utils.image.ImageCacheHelper;
+import us.beacondigital.utils.image.ImageCacheHelper.StorageLocation;
+import us.beacondigital.utils.image.RemoteImageView;
 import android.app.Application;
 
 public class SamplesApplication extends Application {

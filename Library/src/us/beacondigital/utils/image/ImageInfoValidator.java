@@ -1,4 +1,6 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.image;
+
+import us.beacondigital.utils.StringUtils;
 
 public class ImageInfoValidator {
 

@@ -130,38 +130,45 @@ private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener 
 }
 ```
 
-## HttpHelper
+## WebRequest
 
-HttpHelper contains a collection of convenience methods for quickly and easily retrieving data from the web.  Currently, most HTTP verbs are supported and there are overloaded methods for getting a String, Bitmap, HttpResponse or just the headers from a resource on the web.
+WebRequest contains a large number of overloads of three methods that will call a remote URL and return either an HttpResponse or just the contents of the response as a String or a byte array.  In the simplest case, you can simply call these methods with just a URL:
 
 ```java
-// To load an image from a remote URL...
-String imageUrl = "https://a248.e.akamai.net/assets.github.com/images/modules/about_page/octocat.png";
-Bitmap bitmap = HttpHelper.getImage(imageUrl);
 
-// To load the contents of a web page...
-String webPageUrl = "http://www.google.com";
-String webPageBody = HttpHelper.read(webPageUrl);
+String dataUrl = "http://en.gravatar.com/aguynamedrich.json";
+String imageUrl = "http://0.gravatar.com/avatar/8bdc16a462a5bb88c8986e7bd193078d";
 
-// To load the contents of an api endpoint...
-String jsonDataUrl = "http://en.gravatar.com/aguynamedrich.json";
-String jsonData = HttpHelper.read(jsonDataUrl);
+// Get the full response object with 'execute'.
+// You may want to do this to retrieve cookies and headers from the response
+// and/or process the HTTP status code of the response
+DefaultHttpClient client = HttpClientProvider.get();
+HttpResponse response = WebRequest.execute(client, dataUrl);
 
-// To get an HttpResponse from a url, check the status code, and read the response
-// using a combination of HttpClientProvider, StringUtils, IOUtils and HttpHelper
-String url = "http://www.google.com";
-HttpClient client = HttpClientProvider.get();
-HttpResponse response = HttpHelper.getResponse(url, client);
-if(HttpUtils.isOK(response)) {
-	String body = StringUtils.readStream(response);
-	processResult(body);
-}
-else {
-	processError(response.getStatusLine().getStatusCode());
-}
-IOUtils.safeClose(client);
+// If you only need the contents of the response as a String, use 'read'
+String data = WebRequest.read(dataUrl);
+
+// Or if you'd prefer just the contents, but as a byte array, use 'readBytes'
+// An example of this is in the case of downloading image data
+byte[] imageData = WebRequest.readBytes(imageUrl);
+Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
 ```
-
+The examples above show the simplest case of sending an HTTP GET request to a server to get a response.  You can also use WebRequest to call URL's with a variety of HTTP verbs as well as send POST/PUT parameters, HTTP cookies, HTTP headers, authorization credentials or set an encoded entity on the request.
+```java
+// Here is an example that sends an HTTP cookie and an array of parameters as
+// an HTTP POST request.
+Cookie sessionCookie = getSessionCookie();
+Cookie[] cookies = new Cookie[] { sessionCookie };
+NameValuePair[] params = getPostParams();
+Header[] headers = new Header[] { new BasicHeader("Content-Type", "application/json") };
+// Get contents as String
+String content = WebRequest.read(dataUrl, Verb.POST, cookies, params, headers);
+// Get contents as byte array
+byte[] data = WebRequest.readBytes(dataUrl, Verb.POST, cookies, params, headers);
+// Get the HttpResponse object
+DefaultHttpClient client = HttpClientProvider.get();
+HttpResponse response = WebRequest.execute(client, dataUrl, Verb.POST, cookies, params, headers);
+```
 ## UrlHelper
 
 UrlHelper contains a number of overloaded methods to easily add query string parameters of any basic Java value type to a url with a single call.
@@ -179,6 +186,9 @@ String body = StringUtils.readStream(response);
 
 // To read an InputStream into a String...
 String content = StringUtils.readStream(inputStream);
+
+// To read a the content of a file in your res/assets directory
+String content = StringUtils.readAsset("file_name.txt");
 
 // To make sure a Cursor object is closed without the need to check for null or handle an exception...
 IOUtils.safeClose(cursor);

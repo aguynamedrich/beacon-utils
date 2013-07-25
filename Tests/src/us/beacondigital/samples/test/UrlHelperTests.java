@@ -1,6 +1,6 @@
 package us.beacondigital.samples.test;
 
-import us.beacondigital.utils.UrlHelper;
+import us.beacondigital.utils.net.UrlHelper;
 import android.test.AndroidTestCase;
 
 public class UrlHelperTests extends AndroidTestCase {

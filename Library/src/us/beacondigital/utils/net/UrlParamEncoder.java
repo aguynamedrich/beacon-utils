@@ -1,4 +1,4 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.net;
 
 public class UrlParamEncoder {
 	

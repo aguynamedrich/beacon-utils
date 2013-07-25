@@ -1,10 +1,15 @@
-package us.beacondigital.utils;
+package us.beacondigital.utils.image;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import us.beacondigital.utils.IOUtils;
+import us.beacondigital.utils.ServiceLocator;
+import us.beacondigital.utils.net.HttpClientProvider;
+import us.beacondigital.utils.net.WebRequest;
 
 import android.content.Context;
 import android.graphics.Bitmap;
