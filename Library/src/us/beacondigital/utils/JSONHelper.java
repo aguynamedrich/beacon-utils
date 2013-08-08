@@ -150,6 +150,22 @@ public class JSONHelper {
 	}
 	
 	/**
+	 * Returns a JSONObject from a JSONArray at the supplied index.  If the array is null or a JSONObject
+	 * does not exist at the supplied index, the exception is swallowed and a null object is returned.
+	 * @param arr
+	 * @param index
+	 * @return
+	 */
+	public static JSONObject getJSONObject(JSONArray arr, int index) {
+		JSONObject obj = null;
+		try {
+			obj = arr.getJSONObject(index);
+		}
+		catch (Exception e) { }
+		return obj;
+	}
+	
+	/**
 	 * Returns a JSONArray from an outer JSONObject with the given key.  If the key does not exist or the outer object is null,
 	 * the exception is swallowed and a default value of null is returned.
 	 * @param obj
