@@ -341,7 +341,7 @@ public class RemoteImageView extends LinearLayout {
 
 		@Override
 		protected Bitmap doInBackground(ImageInfo... params) {
-			acquireSemaphore();
+			acquireSemaphorePermit();
 			
 			info = params[0];
 			String url = info.getUrl();
@@ -362,7 +362,7 @@ public class RemoteImageView extends LinearLayout {
 			finally {
 				IOUtils.safeClose(stream);
 				IOUtils.safeClose(client);
-				releaseSemaphore();
+				releaseSemaphorePermit();
 			}
 			
 			if(bitmap != null)
@@ -395,21 +395,31 @@ public class RemoteImageView extends LinearLayout {
 		applyAspectRatio();
 	}
 
-	public void acquireSemaphore() {
+	/**
+	 * Acquire a semaphore permit.  Includes logging and exception swallowing
+	 */
+	public void acquireSemaphorePermit() {
 		try {
 			if (semaphore != null) {
-				log("Acquiring semaphore, size:%d, avail:%d", maxDownloads, semaphore.availablePermits());
+				long threadId = Thread.currentThread().getId();
+				log("[%d] Acquiring permit, size:%d, avail:%d", threadId, maxDownloads, semaphore.availablePermits());
 				semaphore.acquire();
+				log("[%d] Permit acquired", threadId);
 			}
 		}
 		catch (Exception ex) { }
 	}
 
-	public void releaseSemaphore() {
+	/**
+	 * Releasing a semaphore permit.  Includes logging and exception swallowing
+	 */
+	public void releaseSemaphorePermit() {
 		try {
 			if (semaphore != null) {
-				log("Releasing semaphore, size:%d, avail:%d", maxDownloads, semaphore.availablePermits());
+				long threadId = Thread.currentThread().getId();
+				log("[%d] Releasing permit, size:%d, avail:%d", threadId, maxDownloads, semaphore.availablePermits());
 				semaphore.release();
+				log("[%d] Permit released", threadId);
 			}
 		}
 		catch (Exception ex) { }
