@@ -2,6 +2,7 @@ package us.beacondigital.utils.image;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Semaphore;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -45,6 +46,8 @@ public class RemoteImageView extends LinearLayout {
 	boolean hasImage = false;
 	boolean cacheToFile = true;
 	
+	static int maxDownloads = 0;
+	static Semaphore semaphore = null;
 	DiskLoadTask diskLoadTask = null;
 	RemoteLoadTask remoteLoadTask = null;
 	
@@ -132,6 +135,17 @@ public class RemoteImageView extends LinearLayout {
 		RemoteImageView.loggingEnabled = loggingEnabled;
 	}
 	
+	/**
+	 * Allows the application to set a maximum number of simultaneous downloads
+	 * @param max
+	 */
+	public static void setMaxDownloads(int max) {
+		if (max > 0) {
+			maxDownloads = max;
+			semaphore = new Semaphore(maxDownloads);
+		}
+	}
+	
 	private void initImageView()
 	{
 		imageView = new ImageView(context);
@@ -147,6 +161,12 @@ public class RemoteImageView extends LinearLayout {
 	public void setBackgroundResource(int resid) {
 		if (imageView != null) {
 			imageView.setBackgroundResource(resid);
+		}
+	}
+	
+	public void setImageResource(int resId) {
+		if (imageView != null) {
+			imageView.setImageResource(resId);
 		}
 	}
 	
@@ -321,6 +341,8 @@ public class RemoteImageView extends LinearLayout {
 
 		@Override
 		protected Bitmap doInBackground(ImageInfo... params) {
+			acquireSemaphore();
+			
 			info = params[0];
 			String url = info.getUrl();
 			
@@ -336,9 +358,11 @@ public class RemoteImageView extends LinearLayout {
 			}
 			catch (IllegalStateException e) { }
 			catch (IOException e) { }
+			catch (NullPointerException e) { }
 			finally {
 				IOUtils.safeClose(stream);
 				IOUtils.safeClose(client);
+				releaseSemaphore();
 			}
 			
 			if(bitmap != null)
@@ -369,6 +393,26 @@ public class RemoteImageView extends LinearLayout {
 		bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
 		imageView.setImageDrawable(bitmapDrawable);
 		applyAspectRatio();
+	}
+
+	public void acquireSemaphore() {
+		try {
+			if (semaphore != null) {
+				log("Acquiring semaphore, size:%d, avail:%d", maxDownloads, semaphore.availablePermits());
+				semaphore.acquire();
+			}
+		}
+		catch (Exception ex) { }
+	}
+
+	public void releaseSemaphore() {
+		try {
+			if (semaphore != null) {
+				log("Releasing semaphore, size:%d, avail:%d", maxDownloads, semaphore.availablePermits());
+				semaphore.release();
+			}
+		}
+		catch (Exception ex) { }
 	}
 
 }
