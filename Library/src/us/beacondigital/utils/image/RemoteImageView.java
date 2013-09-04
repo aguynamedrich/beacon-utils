@@ -107,7 +107,6 @@ public class RemoteImageView extends LinearLayout {
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
-		log("onDetachedFromWindow");
 		cancel();
 		
 	}
@@ -280,11 +279,9 @@ public class RemoteImageView extends LinearLayout {
 	public void cancel() {
 		log("calling cancel");
 		if (remoteLoadTask != null && !remoteLoadTask.isCancelled()) {
-			log("cancelling remoteLoadTask");
 			remoteLoadTask.cancel(true);
 		}
 		if (diskLoadTask != null && !diskLoadTask.isCancelled()) {
-			log("cancelling diskLoadTask");
 			diskLoadTask.cancel(true);
 		}
 	}
@@ -306,11 +303,15 @@ public class RemoteImageView extends LinearLayout {
 
 		@Override
 		protected Bitmap doInBackground(ImageInfo... params) {
+			acquireSemaphorePermit();
 			
 			// attempt to load from local first
 			info = params[0];
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
 			Bitmap bitmap = imageCacheHelper.loadImage(info);
+			
+			releaseSemaphorePermit();
+			
 			return bitmap;
 		}
 		

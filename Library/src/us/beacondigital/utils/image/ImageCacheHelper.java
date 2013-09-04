@@ -169,9 +169,7 @@ public class ImageCacheHelper {
 			for (File file : files) {
 				if (file.isFile()) {
 					boolean deleted = file.delete();
-					Log.d(
-							ImageCacheHelper.class.getSimpleName(),
-							String.format("flushCache::deleting %s. succeeded:%b", file.getName(), deleted));
+					log("flushCache::deleting %s. succeeded:%b", file.getName(), deleted);
 				}
 			}
 		}
@@ -210,7 +208,7 @@ public class ImageCacheHelper {
 	 */
 	private void log(String format, Object... params) {
 		if(RemoteImageView.loggingEnabled) {
-			Log.v(RemoteImageView.class.getSimpleName(), String.format(format, params));
+			Log.v(getClass().getSimpleName(), String.format(format, params));
 		}
 	}
 
