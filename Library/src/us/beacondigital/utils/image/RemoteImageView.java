@@ -344,20 +344,22 @@ public class RemoteImageView extends LinearLayout {
 	private class RemoteLoadTask extends AsyncTask<ImageInfo, Void, Bitmap> {
 		
 		ImageInfo info = null;
+		String url = null;
+		DefaultHttpClient client = HttpClientProvider.get();
+		InputStream stream = null;
 
 		@Override
 		protected Bitmap doInBackground(ImageInfo... params) {
 			acquireSemaphorePermit();
 			
 			info = params[0];
-			String url = info.getUrl();
+			url = info.getUrl();
 			
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-			DefaultHttpClient client = HttpClientProvider.get();
-			InputStream stream = null;
 			Bitmap bitmap = null;
 			
 			try {
+				log("Begin download: %s", url);
 				HttpResponse response = WebRequest.execute(client, url);
 				stream = response.getEntity().getContent();
 				bitmap = BitmapFactory.decodeStream(stream);
@@ -382,6 +384,7 @@ public class RemoteImageView extends LinearLayout {
 				
 			}
 			finally {
+				log("Closing stream for url: %s", url);
 				IOUtils.safeClose(stream);
 				IOUtils.safeClose(client);
 			}
@@ -400,6 +403,7 @@ public class RemoteImageView extends LinearLayout {
 		
 		@Override
 		protected void onCancelled(Bitmap result) {
+			log("onCancelled for url: %s", url);
 			releaseSemaphorePermit();
 		}
 		
