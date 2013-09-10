@@ -143,6 +143,9 @@ public class ImageCacheHelper {
 				log("memCache hit. size:%d eviction:%d, hit:%d, miss:%d", memCache.size(), memCache.evictionCount(), memCache.hitCount(), memCache.missCount());
 				return bitmap;
 			}
+			else {
+				log("memCache miss. size:%d, max:%d, evictions:%d", memCache.size(), memCache.maxSize(), memCache.evictionCount());
+			}
 		}
 		
 		if(isInitialized) {
@@ -179,6 +182,12 @@ public class ImageCacheHelper {
 	public void flushMemoryCache() {
 		if (memCache != null)
 			memCache.evictAll();
+	}
+	
+	public void trimMemoryCache() {
+		if (memCache != null) {
+			memCache.trimToSize(memCache.maxSize() / 2);
+		}
 	}
 	
 	public File getCacheDirectory() { return cacheDirectory; }

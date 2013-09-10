@@ -136,12 +136,13 @@ public class RemoteImageView extends LinearLayout {
 	
 	/**
 	 * Allows the application to set a maximum number of simultaneous downloads
+	 * and disk reads
 	 * @param max
 	 */
 	public static void setMaxDownloads(int max) {
 		if (max > 0) {
 			maxDownloads = max;
-			semaphore = new Semaphore(maxDownloads);
+			semaphore = new Semaphore(maxDownloads, true);
 		}
 	}
 	
@@ -308,11 +309,13 @@ public class RemoteImageView extends LinearLayout {
 			// attempt to load from local first
 			info = params[0];
 			ImageCacheHelper imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
-			Bitmap bitmap = imageCacheHelper.loadImage(info);
-			
-			releaseSemaphorePermit();
-			
+			Bitmap bitmap = imageCacheHelper.loadImage(info);			
 			return bitmap;
+		}
+		
+		@Override
+		protected void onCancelled(Bitmap result) {
+			releaseSemaphorePermit();
 		}
 		
 		@Override
@@ -323,12 +326,14 @@ public class RemoteImageView extends LinearLayout {
 					hasImage = true;
 					refresh(bitmap);
 				}
+				releaseSemaphorePermit();
 			}
 			else
 			{
 				if (remoteLoadTask != null && !remoteLoadTask.isCancelled()) {
 					remoteLoadTask.cancel(true);
 				}
+				releaseSemaphorePermit();
 				remoteLoadTask = new RemoteLoadTask();
 				remoteLoadTask.execute(info);
 			}
@@ -357,13 +362,28 @@ public class RemoteImageView extends LinearLayout {
 				stream = response.getEntity().getContent();
 				bitmap = BitmapFactory.decodeStream(stream);
 			}
-			catch (IllegalStateException e) { }
-			catch (IOException e) { }
-			catch (NullPointerException e) { }
+			catch (IllegalStateException e) {
+				log("RemoteLoadTask:%s caught while downloading: %s", e.getClass().getSimpleName(), url);
+			}
+			catch (IOException e) {
+				log("RemoteLoadTask:%s caught while downloading: %s", e.getClass().getSimpleName(), url);
+			}
+			catch (NullPointerException e) {
+				log("RemoteLoadTask:%s caught while downloading: %s", e.getClass().getSimpleName(), url);
+			}
+			catch (OutOfMemoryError e) {
+				log("RemoteLoadTask:%s caught while downloading: %s", e.getClass().getSimpleName(), url);
+				log("Running GC and trimming memory cache");
+				System.gc();
+				if (imageCacheHelper == null) {
+					imageCacheHelper = ServiceLocator.resolve(ImageCacheHelper.class);
+				}
+				imageCacheHelper.trimMemoryCache();
+				
+			}
 			finally {
 				IOUtils.safeClose(stream);
 				IOUtils.safeClose(client);
-				releaseSemaphorePermit();
 			}
 			
 			if(bitmap != null)
@@ -379,12 +399,18 @@ public class RemoteImageView extends LinearLayout {
 		}
 		
 		@Override
+		protected void onCancelled(Bitmap result) {
+			releaseSemaphorePermit();
+		}
+		
+		@Override
 		protected void onPostExecute(final Bitmap bitmap) {
 			if (bitmap != null) {
 				if (info != null && info.equals(imageInfo)) {
 					refresh(bitmap);
 				}
 			}
+			releaseSemaphorePermit();
 		}
 		
 	}
