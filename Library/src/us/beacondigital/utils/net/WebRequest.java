@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -195,6 +196,9 @@ public class WebRequest {
 				request.addHeader(header);
 		}
 		
+		// If we have anything in WebRequestGlobalHeaders...
+		addGlobalHeaders(request);
+		
 		try {
 			response = client.execute(request);
 		}
@@ -257,6 +261,19 @@ public class WebRequest {
 			catch (AuthenticationException e) { }
 			if (authorizationHeader != null)
 				request.addHeader(authorizationHeader);
+		}
+	}
+	
+	/**
+	 * For all global headers in WebRequestGlobalHeaders, add to this request
+	 * @param request
+	 */
+	private static void addGlobalHeaders(HttpRequest request) {
+		List<Header> globalHeaders = WebRequestGlobalHeaders.get();
+		if (globalHeaders != null) {
+			for (Header header : globalHeaders) {
+				request.addHeader(header);
+			}
 		}
 	}
 	
