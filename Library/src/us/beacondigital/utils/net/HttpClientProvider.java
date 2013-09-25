@@ -14,7 +14,14 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
+import us.beacondigital.utils.StringUtils;
+
 public class HttpClientProvider {
+	
+	private static String userAgent = null;
+	public static void setUserAgent(String input) {
+		userAgent = input;
+	}
 
     // Default connection and socket timeout of 60 seconds. Tweak to taste.
     private static final int SOCKET_OPERATION_TIMEOUT = 60 * 1000;
@@ -37,9 +44,21 @@ public class HttpClientProvider {
         ClientConnectionManager conMgr = new ThreadSafeClientConnManager(params, schReg);
 
         DefaultHttpClient client = new DefaultHttpClient(conMgr, params);
+    	client.getParams().setParameter(HTTP.USER_AGENT, getUserAgent());
 
         return client;
     }
+    
+    /**
+     * Provide a default value for user agent string if not set
+     * @return
+     */
+	private static String getUserAgent() {
+		if (StringUtils.isNullOrEmpty(userAgent)) {
+			setUserAgent(System.getProperty("http.agent"));
+		}
+		return userAgent;
+	}
     
     
 }
