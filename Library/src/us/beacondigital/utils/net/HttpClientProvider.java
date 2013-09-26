@@ -9,6 +9,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -44,7 +45,8 @@ public class HttpClientProvider {
         ClientConnectionManager conMgr = new ThreadSafeClientConnManager(params, schReg);
 
         DefaultHttpClient client = new DefaultHttpClient(conMgr, params);
-    	client.getParams().setParameter(HTTP.USER_AGENT, getUserAgent());
+        client.getParams().setParameter(HTTP.USER_AGENT, getUserAgent());
+        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, getUserAgent());
 
         return client;
     }
@@ -53,7 +55,7 @@ public class HttpClientProvider {
      * Provide a default value for user agent string if not set
      * @return
      */
-	private static String getUserAgent() {
+	public static String getUserAgent() {
 		if (StringUtils.isNullOrEmpty(userAgent)) {
 			setUserAgent(System.getProperty("http.agent"));
 		}
