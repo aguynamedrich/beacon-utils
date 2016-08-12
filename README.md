@@ -1,3 +1,6 @@
+DEPRECATED - NO LONGER IN USE - THIS WAS CREATED A REALLY LONG TIME AGO
+============
+
 Beacon Utils for Android
 ============
 
